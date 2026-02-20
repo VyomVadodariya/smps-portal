@@ -447,7 +447,7 @@
             <!-- Admin: Teams/Projects Tracking Tab -->
             <div id="admin-tab-teams" class="hidden">
                 <div class="mb-4">
-                    <p class="text-gray-500">Overview of all active R&D Projects. Click a project card to view its entire team and a combined timeline of all work submitted by those members.</p>
+                    <p class="text-gray-500">Overview of all active R&D Projects. Click a project card to view its entire team, edit team members, and view a combined timeline of all work submitted.</p>
                 </div>
                 <div id="admin-team-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     <!-- Populated by JS dynamically -->
@@ -531,6 +531,7 @@
 
             <!-- Admin: Approvals Tab -->
             <div id="admin-tab-approvals" class="hidden">
+                
                 <div class="table-container p-4">
                     <h3 class="mb-4">Today's Campus Daily Attendance</h3>
                     <p class="text-sm text-gray-500 mb-4">Approve both Morning and Evening requests to mark a student 'Present'. You can also manually edit a student's status.</p>
@@ -770,10 +771,31 @@
                 <button onclick="App.closeViewTeamModal()" class="btn btn-sm btn-outline"><i class="fas fa-times"></i></button>
             </div>
             
-            <div class="mb-4 p-4 bg-light rounded">
-                <h4 class="mb-2 font-bold"><i class="fas fa-users"></i> Active Team Members:</h4>
+            <div class="mb-4 p-4 bg-light rounded border border-gray-200">
+                <div class="flex justify-between items-center mb-3">
+                    <h4 class="font-bold"><i class="fas fa-users"></i> Active Team Members</h4>
+                    <button onclick="App.toggleManageTeam()" class="btn btn-sm btn-outline"><i class="fas fa-user-edit"></i> Edit Team</button>
+                </div>
+                
                 <div id="vt-team-members" class="flex flex-wrap gap-2">
                     <!-- Badges injected here -->
+                </div>
+
+                <!-- Hidden Manage Team Section -->
+                <div id="vt-manage-section" class="hidden mt-4 pt-4 border-t border-gray-300">
+                    <h5 class="text-sm font-bold mb-2">Remove Members:</h5>
+                    <div class="mb-4" id="vt-manage-list">
+                        <!-- list of members -->
+                    </div>
+                    <h5 class="text-sm font-bold mb-2">Add Member:</h5>
+                    <div class="flex gap-2 items-center flex-wrap">
+                        <select id="vt-add-member-select" class="form-control text-sm" style="flex: 1; min-width: 150px;"></select>
+                        <select id="vt-add-member-slot" class="form-control text-sm" style="width: 140px;">
+                            <option value="p1">Assign to Project 1</option>
+                            <option value="p2">Assign to Project 2</option>
+                        </select>
+                        <button onclick="App.addTeamMember()" class="btn btn-sm btn-success"><i class="fas fa-plus"></i> Add</button>
+                    </div>
                 </div>
             </div>
 
@@ -1008,6 +1030,7 @@
             chartInstance: null,
             currentViewedSrn: null,
             currentViewedTeam: null,
+            isManageTeamOpen: false,
 
             subjects: [
                 { id: 'sub1', name: 'Data Structures', code: 'CS301', total: 40 },
@@ -1371,7 +1394,7 @@
                 
                 // Get Members
                 const members = this.data.students.filter(x => (x.p1 && x.p1.trim() === projName) || (x.p2 && x.p2.trim() === projName));
-                document.getElementById('vt-team-members').innerHTML = members.map(m => `<span class="badge badge-dark">${m.name} (${m.srn})</span>`).join('');
+                document.getElementById('vt-team-members').innerHTML = members.map(m => `<span class="badge badge-dark">${m.name} (${m.srn})</span>`).join('') || '<span class="text-sm text-gray-500">No active members</span>';
 
                 // Get Logs
                 const teamLogs = this.data.progressLogs.filter(l => {
@@ -1411,11 +1434,81 @@
                     }).join('');
                 }
 
+                // Handle the manage section UI
+                if(this.isManageTeamOpen) {
+                    document.getElementById('vt-manage-section').classList.remove('hidden');
+                    this.renderManageTeam();
+                } else {
+                    document.getElementById('vt-manage-section').classList.add('hidden');
+                }
+
                 document.getElementById('modal-view-team').classList.remove('hidden');
+            },
+
+            toggleManageTeam() {
+                this.isManageTeamOpen = !this.isManageTeamOpen;
+                if (this.isManageTeamOpen) {
+                    document.getElementById('vt-manage-section').classList.remove('hidden');
+                    this.renderManageTeam();
+                } else {
+                    document.getElementById('vt-manage-section').classList.add('hidden');
+                }
+            },
+
+            renderManageTeam() {
+                if (!this.currentViewedTeam) return;
+                const projName = this.currentViewedTeam;
+                
+                // Render Removable Members
+                const members = this.data.students.filter(x => (x.p1 && x.p1.trim() === projName) || (x.p2 && x.p2.trim() === projName));
+                const manageList = document.getElementById('vt-manage-list');
+                
+                if (members.length === 0) {
+                    manageList.innerHTML = '<p class="text-sm text-gray-500">No members to remove.</p>';
+                } else {
+                    manageList.innerHTML = members.map(m => `
+                        <div class="flex justify-between items-center p-2 bg-white mb-1 rounded border text-sm">
+                            <span>${m.name} (${m.srn})</span> 
+                            <button onclick="App.removeTeamMember('${m.srn}')" class="btn btn-sm btn-danger px-2 py-1"><i class="fas fa-times"></i></button>
+                        </div>
+                    `).join('');
+                }
+
+                // Render Addable Members (anyone not in the team)
+                const nonMembers = this.data.students.filter(x => !members.find(m => m.srn === x.srn));
+                const addSelect = document.getElementById('vt-add-member-select');
+                addSelect.innerHTML = '<option value="">-- Select Student to Add --</option>' + nonMembers.map(m => `<option value="${m.srn}">${m.name} (${m.srn})</option>`).join('');
+            },
+
+            async removeTeamMember(srn) {
+                if(!confirm('Remove this student from the project?')) return;
+                const student = this.data.students.find(s => s.srn === srn);
+                if(student) {
+                    if(student.p1 && student.p1.trim() === this.currentViewedTeam) student.p1 = '-';
+                    if(student.p2 && student.p2.trim() === this.currentViewedTeam) student.p2 = '-';
+                    await this.setDbDoc('smps_students', srn, student);
+                    this.showToast('Student removed from team', 'success');
+                }
+            },
+
+            async addTeamMember() {
+                const srn = document.getElementById('vt-add-member-select').value;
+                const slot = document.getElementById('vt-add-member-slot').value;
+                if(!srn) {
+                    this.showToast('Please select a student to add', 'warning');
+                    return;
+                }
+                const student = this.data.students.find(s => s.srn === srn);
+                if(student) {
+                    student[slot] = this.currentViewedTeam;
+                    await this.setDbDoc('smps_students', srn, student);
+                    this.showToast('Student added to team', 'success');
+                }
             },
 
             closeViewTeamModal() {
                 this.currentViewedTeam = null;
+                this.isManageTeamOpen = false;
                 document.getElementById('modal-view-team').classList.add('hidden');
             },
 

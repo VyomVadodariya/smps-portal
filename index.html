@@ -38,6 +38,7 @@
         /* Utility Classes */
         .hidden { display: none !important; }
         .flex { display: flex; }
+        .flex-col { flex-direction: column; }
         .grid { display: grid; }
         .items-center { align-items: center; }
         .justify-between { justify-content: space-between; }
@@ -397,23 +398,37 @@
             <div id="admin-tab-overview">
                 <!-- IMPORTANT: Data Setup Box if DB is empty -->
                 <div id="empty-db-warning" class="hidden mb-4 p-4 rounded" style="background: #FEF3C7; border-left: 5px solid #F59E0B;">
-                    <h3 class="font-bold text-lg mb-2" style="color: #92400E;">Database is Empty!</h3>
-                    <p style="color: #92400E;" class="mb-3">We detected that there are 0 students in your live database. Click the button below to instantly load the 33 assigned students.</p>
+                    <h3 class="font-bold text-lg mb-2" style="color: #92400E;">Database needs initialization!</h3>
+                    <p style="color: #92400E;" class="mb-3">To ensure all student contact details (email/phone) appear correctly, please click this button below to re-sync the database.</p>
                     <button onclick="App.seedStudents()" class="btn btn-primary"><i class="fas fa-database"></i> Load 33 Students Database</button>
                 </div>
 
                 <div class="stats-grid">
-                    <div class="stat-card">
-                        <h3>Total Students</h3>
-                        <div class="value" id="stat-total-students">0</div>
+                    <!-- Stat Card 1 -->
+                    <div class="stat-card flex flex-col justify-between">
+                        <div>
+                            <h3>Total Students</h3>
+                            <div class="value" id="stat-total-students">0</div>
+                        </div>
+                        <button onclick="App.switchAdminTab('students')" class="btn btn-sm btn-outline mt-4 w-full justify-center">Manage Students <i class="fas fa-arrow-right ml-1"></i></button>
                     </div>
-                    <div class="stat-card" style="border-left-color: var(--warning);">
-                        <h3>Pending Approvals (All)</h3>
-                        <div class="value" id="stat-pending-approvals">0</div>
+                    
+                    <!-- Stat Card 2 -->
+                    <div class="stat-card flex flex-col justify-between" style="border-left-color: var(--warning);">
+                        <div>
+                            <h3>Pending Approvals (All)</h3>
+                            <div class="value" id="stat-pending-approvals">0</div>
+                        </div>
+                        <button onclick="App.switchAdminTab('approvals')" class="btn btn-sm btn-outline mt-4 w-full justify-center" style="border-color: var(--warning); color: var(--warning);">Daily Approvals <i class="fas fa-arrow-right ml-1"></i></button>
                     </div>
-                    <div class="stat-card" style="border-left-color: var(--secondary);">
-                        <h3>Total Project Logs</h3>
-                        <div class="value" id="stat-total-logs">0</div>
+                    
+                    <!-- Stat Card 3 -->
+                    <div class="stat-card flex flex-col justify-between" style="border-left-color: var(--secondary);">
+                        <div>
+                            <h3>Total Project Logs</h3>
+                            <div class="value" id="stat-total-logs">0</div>
+                        </div>
+                        <button onclick="App.switchAdminTab('teams')" class="btn btn-sm btn-outline mt-4 w-full justify-center" style="border-color: var(--secondary); color: var(--secondary);">Team Projects <i class="fas fa-arrow-right ml-1"></i></button>
                     </div>
                 </div>
             </div>
@@ -1321,18 +1336,20 @@
 
                 const tbody = document.getElementById('student-list-body');
                 tbody.innerHTML = this.data.students.map(s => {
-                    const contactHtml = `
-                        ${s.email ? `<div class="text-xs text-gray-500 mb-1"><i class="fas fa-envelope"></i> ${s.email}</div>` : ''}
-                        ${s.phone ? `<div class="text-xs text-gray-500 mb-1"><i class="fas fa-phone"></i> ${s.phone}</div>` : ''}
-                        ${s.address ? `<div class="text-xs text-gray-400" style="max-width: 200px; white-space: normal; overflow-wrap: break-word;"><i class="fas fa-map-marker-alt"></i> ${s.address}</div>` : ''}
-                    `;
+                    let contactHtml = '';
+                    if (s.email && s.email.trim() !== '') contactHtml += `<div class="text-xs text-gray-500 mb-1"><i class="fas fa-envelope"></i> ${s.email}</div>`;
+                    if (s.phone && s.phone.trim() !== '') contactHtml += `<div class="text-xs text-gray-500 mb-1"><i class="fas fa-phone"></i> ${s.phone}</div>`;
+                    if (s.address && s.address.trim() !== '') contactHtml += `<div class="text-xs text-gray-400" style="max-width: 200px; white-space: normal; overflow-wrap: break-word;"><i class="fas fa-map-marker-alt"></i> ${s.address}</div>`;
+                    
+                    const finalContactDisplay = contactHtml.trim() !== '' ? contactHtml : '<span class="text-xs text-gray-400">No contact info</span>';
+                    
                     return `
                         <tr>
                             <td class="font-bold text-primary">${s.srn}</td>
                             <td>${s.name}</td>
                             <td>${s.dept}</td>
                             <td>${s.sem}</td>
-                            <td>${contactHtml || '<span class="text-xs text-gray-400">No contact info</span>'}</td>
+                            <td>${finalContactDisplay}</td>
                             <td><button onclick="App.openEditModal('${s.srn}')" class="btn btn-sm btn-outline">Edit</button></td>
                         </tr>
                     `;

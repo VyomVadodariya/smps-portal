@@ -197,6 +197,25 @@
         .badge-primary { background: #e0e7ff; color: var(--primary-dark); }
         .badge-dark { background: #374151; color: #ffffff; }
 
+        /* Chat Styles */
+        .chat-container {
+            height: 350px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            padding: 1rem;
+            background: var(--light);
+            border-radius: 8px;
+            border: 1px solid #e5e7eb;
+        }
+        .chat-bubble { max-width: 85%; padding: 0.5rem 1rem; border-radius: 12px; font-size: 0.875rem; position: relative; }
+        .chat-mine { background: var(--primary); color: white; align-self: flex-end; border-bottom-right-radius: 0; }
+        .chat-other { background: white; color: var(--dark); border: 1px solid #e5e7eb; align-self: flex-start; border-bottom-left-radius: 0; }
+        .chat-meta { font-size: 0.65rem; opacity: 0.8; margin-top: 0.25rem; display: block; text-align: right; }
+        .chat-sender { font-size: 0.7rem; font-weight: bold; margin-bottom: 0.2rem; color: var(--primary-dark); }
+        .chat-mine .chat-sender { display: none; } /* hide own name */
+
         /* Modals */
         .modal-overlay {
             position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 10000;
@@ -271,6 +290,7 @@
         .toast.show { transform: translateY(0); }
         .toast.success { border-left: 4px solid var(--secondary); }
         .toast.error { border-left: 4px solid var(--danger); }
+        .toast.warning { border-left: 4px solid var(--warning); }
         
         #local-warning {
             display: none;
@@ -370,6 +390,7 @@
                 <a onclick="App.switchAdminTab('students')" id="nav-admin-students" class="nav-item"><i class="fas fa-users"></i> Manage Students</a>
                 <a onclick="App.switchAdminTab('teams')" id="nav-admin-teams" class="nav-item"><i class="fas fa-users-cog"></i> Team Tracking</a>
                 <a onclick="App.switchAdminTab('projects')" id="nav-admin-projects" class="nav-item"><i class="fas fa-tasks"></i> Individual Logs</a>
+                <a onclick="App.switchAdminTab('announcements')" id="nav-admin-announcements" class="nav-item"><i class="fas fa-bullhorn"></i> Announcements</a>
                 <a onclick="App.switchAdminTab('timetable')" id="nav-admin-timetable" class="nav-item"><i class="fas fa-calendar-alt"></i> Manage Timetable</a>
                 <a onclick="App.switchAdminTab('resources')" id="nav-admin-resources" class="nav-item"><i class="fas fa-folder-open"></i> Manage Resources</a>
                 <a onclick="App.switchAdminTab('approvals')" id="nav-admin-approvals" class="nav-item">
@@ -494,6 +515,45 @@
                     </div>
                 </div>
             </div>
+            
+            <!-- Admin: Announcements Tab -->
+            <div id="admin-tab-announcements" class="hidden">
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                    <div class="lg:col-span-1">
+                        <div class="stat-card">
+                            <h3 class="mb-4">Post New Notice</h3>
+                            <form onsubmit="App.postAnnouncement(event)">
+                                <div class="form-group mb-3">
+                                    <label>Title / Subject</label>
+                                    <input type="text" id="announce-title" class="form-control" required placeholder="e.g. Holiday Tomorrow">
+                                </div>
+                                <div class="form-group mb-3">
+                                    <label>Priority Level</label>
+                                    <select id="announce-type" class="form-control">
+                                        <option value="info">Info (Blue)</option>
+                                        <option value="warning">Warning (Yellow)</option>
+                                        <option value="danger">Urgent (Red)</option>
+                                        <option value="success">Good News (Green)</option>
+                                    </select>
+                                </div>
+                                <div class="form-group mb-4">
+                                    <label>Message</label>
+                                    <textarea id="announce-text" class="form-control" rows="4" required placeholder="Type the announcement details..."></textarea>
+                                </div>
+                                <button type="submit" class="btn btn-primary w-full justify-center"><i class="fas fa-paper-plane"></i> Broadcast</button>
+                            </form>
+                        </div>
+                    </div>
+                    <div class="lg:col-span-2">
+                        <div class="table-container p-4">
+                            <h3 class="mb-4">Active Global Announcements</h3>
+                            <div id="admin-announcements-list">
+                                <!-- Populated by JS -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
             <!-- Admin: Timetable Tab -->
             <div id="admin-tab-timetable" class="hidden">
@@ -604,6 +664,7 @@
             <nav>
                 <a onclick="App.switchStudentTab('dashboard')" id="nav-student-dashboard" class="nav-item active"><i class="fas fa-home"></i> My Dashboard</a>
                 <a onclick="App.switchStudentTab('projects')" id="nav-student-projects" class="nav-item"><i class="fas fa-project-diagram"></i> My Projects</a>
+                <a onclick="App.switchStudentTab('communication')" id="nav-student-communication" class="nav-item"><i class="fas fa-comments"></i> Communication & Chat</a>
                 <a onclick="App.switchStudentTab('timetable')" id="nav-student-timetable" class="nav-item"><i class="fas fa-calendar"></i> Timetable</a>
                 <a onclick="App.switchStudentTab('resources')" id="nav-student-resources" class="nav-item"><i class="fas fa-book"></i> Resources</a>
             </nav>
@@ -676,18 +737,24 @@
             <div id="student-tab-projects" class="hidden">
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
                     <!-- Project Details & Form -->
-                    <div>
-                        <div class="stat-card mb-4" style="border-left-color: var(--secondary);">
+                    <div class="flex flex-col gap-4">
+                        <div class="stat-card" style="border-left-color: var(--secondary);">
                             <h3 class="text-primary font-bold mb-4"><i class="fas fa-tasks"></i> My Assigned Projects</h3>
                             <div class="mb-4">
                                 <p class="text-sm text-gray-500">Project 1:</p>
-                                <p class="font-bold mb-1" id="st-proj1-name">Loading...</p>
-                                <p class="text-xs text-primary"><i class="fas fa-users"></i> Teammates: <span id="st-proj1-teammates" class="text-gray-500">-</span></p>
+                                <p class="font-bold mb-2 text-lg" id="st-proj1-name">Loading...</p>
+                                <p class="text-xs text-primary mb-2 font-bold"><i class="fas fa-users"></i> Project 1 Team Members:</p>
+                                <div id="st-proj1-teammates-container" class="flex flex-col gap-2">
+                                    <!-- Cards populated here -->
+                                </div>
                             </div>
-                            <div>
+                            <div class="border-t pt-4">
                                 <p class="text-sm text-gray-500">Project 2:</p>
-                                <p class="font-bold mb-1" id="st-proj2-name">Loading...</p>
-                                <p class="text-xs text-primary"><i class="fas fa-users"></i> Teammates: <span id="st-proj2-teammates" class="text-gray-500">-</span></p>
+                                <p class="font-bold mb-2 text-lg" id="st-proj2-name">Loading...</p>
+                                <p class="text-xs text-primary mb-2 font-bold"><i class="fas fa-users"></i> Project 2 Team Members:</p>
+                                <div id="st-proj2-teammates-container" class="flex flex-col gap-2">
+                                    <!-- Cards populated here -->
+                                </div>
                             </div>
                         </div>
 
@@ -718,10 +785,51 @@
                     <!-- Progress Timeline -->
                     <div class="stat-card">
                         <h3 class="mb-4"><i class="fas fa-history"></i> My Progress History</h3>
-                        <div id="student-progress-timeline" style="max-height: 500px; overflow-y: auto; padding-right: 10px;">
+                        <div id="student-progress-timeline" style="max-height: 700px; overflow-y: auto; padding-right: 10px;">
                             <!-- Populated by JS -->
                         </div>
                     </div>
+                </div>
+            </div>
+            
+            <!-- Student: Communication & Chat Tab -->
+            <div id="student-tab-communication" class="hidden">
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                    
+                    <!-- Notice Board -->
+                    <div class="lg:col-span-1">
+                        <div class="stat-card" style="height: 100%; border-left-color: var(--warning);">
+                            <h3 class="mb-4"><i class="fas fa-bullhorn"></i> Notice Board</h3>
+                            <div id="student-announcements-list" style="max-height: 450px; overflow-y: auto; padding-right: 5px;">
+                                <!-- Populated by JS -->
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Project Team Chat -->
+                    <div class="lg:col-span-2">
+                        <div class="stat-card h-full">
+                            <div class="flex justify-between items-center mb-4 border-b pb-3">
+                                <h3><i class="fas fa-comments"></i> Team Chat Room</h3>
+                                <select id="chat-project-select" class="form-control w-auto py-1 px-2 text-sm" onchange="App.renderChat()">
+                                    <option value="1">Project 1 Team</option>
+                                    <option value="2">Project 2 Team</option>
+                                </select>
+                            </div>
+                            
+                            <!-- Chat Area -->
+                            <div id="chat-messages-container" class="chat-container mb-4">
+                                <!-- Messages injected here -->
+                            </div>
+                            
+                            <!-- Chat Input -->
+                            <form onsubmit="App.sendChatMessage(event)" class="flex gap-2">
+                                <input type="text" id="chat-input" class="form-control" placeholder="Type a message to your team..." required autocomplete="off">
+                                <button type="submit" class="btn btn-primary"><i class="fas fa-paper-plane"></i></button>
+                            </form>
+                        </div>
+                    </div>
+                    
                 </div>
             </div>
 
@@ -1091,6 +1199,8 @@
                 timetable: [],
                 resources: [],
                 progressLogs: [], 
+                announcements: [],
+                messages: [],
                 currentUser: null
             },
             
@@ -1161,7 +1271,7 @@
             },
 
             listenToCollections() {
-                const cols = ['smps_students', 'smps_attendance', 'smps_dailyAttendance', 'smps_timetable', 'smps_resources', 'smps_progressLogs'];
+                const cols = ['smps_students', 'smps_attendance', 'smps_dailyAttendance', 'smps_timetable', 'smps_resources', 'smps_progressLogs', 'smps_announcements', 'smps_messages'];
                 
                 cols.forEach(colName => {
                     const ref = collection(db, 'artifacts', appId, 'public', 'data', colName);
@@ -1380,6 +1490,7 @@
 
                 this.renderAdminTeams();
                 this.renderAdminProjects();
+                this.renderAdminAnnouncements();
 
                 const ttBody = document.getElementById('admin-timetable-body');
                 ttBody.innerHTML = this.data.timetable.map(t => `
@@ -1777,9 +1888,50 @@
                 this.showToast(`${shift.charAt(0).toUpperCase() + shift.slice(1)} attendance updated!`, status === 'approved' ? 'success' : 'error');
             },
 
+            // --- ADMIN: ANNOUNCEMENTS ---
+            renderAdminAnnouncements() {
+                const list = document.getElementById('admin-announcements-list');
+                const announcements = [...this.data.announcements].sort((a,b) => new Date(b.date) - new Date(a.date));
+                
+                if (announcements.length === 0) {
+                    list.innerHTML = '<p class="text-gray-500 text-center py-4">No active announcements.</p>';
+                    return;
+                }
+
+                list.innerHTML = announcements.map(a => `
+                    <div class="mb-3 p-3 rounded border border-${a.type === 'danger' ? 'red' : (a.type === 'warning' ? 'yellow' : (a.type === 'success' ? 'green' : 'blue'))}-200" style="background-color: ${a.type === 'danger' ? '#FEF2F2' : (a.type === 'warning' ? '#FFFBEB' : (a.type === 'success' ? '#ECFDF5' : '#EFF6FF'))};">
+                        <div class="flex justify-between items-start mb-1">
+                            <h4 class="font-bold text-${a.type === 'danger' ? 'red' : (a.type === 'warning' ? 'yellow' : (a.type === 'success' ? 'green' : 'blue'))}-800">${a.title}</h4>
+                            <button onclick="App.deleteAnnouncement('${a.id}')" class="text-gray-500 hover:text-red-500 bg-transparent border-none cursor-pointer"><i class="fas fa-trash"></i></button>
+                        </div>
+                        <p class="text-sm text-gray-700 mb-2">${a.text}</p>
+                        <span class="text-xs text-gray-500">${new Date(a.date).toLocaleString()}</span>
+                    </div>
+                `).join('');
+            },
+
+            postAnnouncement(e) {
+                e.preventDefault();
+                const id = Date.now().toString();
+                const title = document.getElementById('announce-title').value;
+                const type = document.getElementById('announce-type').value;
+                const text = document.getElementById('announce-text').value;
+
+                this.setDbDoc('smps_announcements', id, { id, title, type, text, date: new Date().toISOString() });
+                e.target.reset();
+                this.showToast('Announcement broadcasted to all students!', 'success');
+            },
+
+            deleteAnnouncement(id) {
+                if(confirm('Delete this announcement?')) {
+                    this.delDbDoc('smps_announcements', id);
+                    this.showToast('Announcement deleted');
+                }
+            },
+
             switchAdminTab(tabName) {
                 this.closeSidebar();
-                ['overview', 'students', 'teams', 'projects', 'timetable', 'resources', 'approvals'].forEach(t => {
+                ['overview', 'students', 'teams', 'projects', 'announcements', 'timetable', 'resources', 'approvals'].forEach(t => {
                     document.getElementById(`admin-tab-${t}`).classList.add('hidden');
                     document.getElementById(`nav-admin-${t}`).classList.remove('active');
                 });
@@ -1791,6 +1943,7 @@
                     students: 'Student Directory', 
                     teams: 'Project Teams Tracking',
                     projects: 'Individual Student Logs',
+                    announcements: 'Broadcast Announcements',
                     timetable: 'Manage Timetable',
                     resources: 'Manage Resources',
                     approvals: 'Daily Attendance & Approvals' 
@@ -1984,6 +2137,7 @@
                 this.renderStudentProjects();
                 this.renderStudentTimetable();
                 this.renderStudentResources();
+                this.renderStudentCommunication();
             },
 
             renderAttendancePieChart(srn) {
@@ -2050,13 +2204,25 @@
                 this.showToast(`${type.charAt(0).toUpperCase() + type.slice(1)} attendance sent for admin approval!`);
             },
 
-            getTeammates(projName, mySrn) {
-                if (!projName || projName === '-' || projName.trim() === '') return 'None';
+            renderTeammateCards(projName, mySrn) {
+                if (!projName || projName === '-' || projName.trim() === '') return '<span class="text-sm text-gray-500 italic">No assigned project yet.</span>';
                 const p = projName.trim();
                 const mates = this.data.students.filter(x => 
                     ((x.p1 && x.p1.trim() === p) || (x.p2 && x.p2.trim() === p)) && x.srn !== mySrn
                 );
-                return mates.length > 0 ? mates.map(m => m.name).join(', ') : 'None';
+                
+                if (mates.length === 0) return '<span class="text-sm text-gray-500 italic">No teammates found for this project.</span>';
+                
+                return mates.map(m => `
+                    <div class="bg-white border border-gray-200 p-2 rounded shadow-sm text-sm">
+                        <div class="font-bold text-dark">${m.name} <span class="text-xs font-normal text-gray-500 ml-1">(${m.dept})</span></div>
+                        <div class="flex gap-3 mt-1">
+                            ${m.phone ? `<a href="tel:${m.phone}" class="text-primary text-xs" style="text-decoration:none;"><i class="fas fa-phone"></i> ${m.phone}</a>` : ''}
+                            ${m.email ? `<a href="mailto:${m.email}" class="text-primary text-xs" style="text-decoration:none;"><i class="fas fa-envelope"></i> Email</a>` : ''}
+                            ${!m.phone && !m.email ? `<span class="text-xs text-gray-400">No contact info</span>` : ''}
+                        </div>
+                    </div>
+                `).join('');
             },
 
             renderStudentProjects() {
@@ -2064,9 +2230,9 @@
                 document.getElementById('st-proj1-name').innerText = s.p1 || "Not Assigned";
                 document.getElementById('st-proj2-name').innerText = s.p2 || "Not Assigned";
 
-                // Map Teammates
-                document.getElementById('st-proj1-teammates').innerText = this.getTeammates(s.p1, s.srn);
-                document.getElementById('st-proj2-teammates').innerText = this.getTeammates(s.p2, s.srn);
+                // Render rich Teammate Cards
+                document.getElementById('st-proj1-teammates-container').innerHTML = this.renderTeammateCards(s.p1, s.srn);
+                document.getElementById('st-proj2-teammates-container').innerHTML = this.renderTeammateCards(s.p2, s.srn);
 
                 const myLogs = this.data.progressLogs.filter(l => l.srn === s.srn).sort((a,b) => new Date(b.date) - new Date(a.date));
                 const container = document.getElementById('student-progress-timeline');
@@ -2133,6 +2299,99 @@
                     this.showToast('Progress log deleted');
                 }
             },
+            
+            // --- STUDENT COMMUNICATION: NOTICES & CHAT ---
+            renderStudentCommunication() {
+                // Render Notice Board
+                const list = document.getElementById('student-announcements-list');
+                const announcements = [...this.data.announcements].sort((a,b) => new Date(b.date) - new Date(a.date));
+                
+                if (announcements.length === 0) {
+                    list.innerHTML = '<p class="text-gray-500 text-center py-4">No new notices at this time.</p>';
+                } else {
+                    list.innerHTML = announcements.map(a => `
+                        <div class="mb-3 p-3 rounded border border-${a.type === 'danger' ? 'red' : (a.type === 'warning' ? 'yellow' : (a.type === 'success' ? 'green' : 'blue'))}-200" style="background-color: ${a.type === 'danger' ? '#FEF2F2' : (a.type === 'warning' ? '#FFFBEB' : (a.type === 'success' ? '#ECFDF5' : '#EFF6FF'))};">
+                            <h4 class="font-bold mb-1 text-${a.type === 'danger' ? 'red' : (a.type === 'warning' ? 'yellow' : (a.type === 'success' ? 'green' : 'blue'))}-800">${a.title}</h4>
+                            <p class="text-sm text-gray-700 mb-2">${a.text}</p>
+                            <span class="text-xs text-gray-500">${new Date(a.date).toLocaleString()}</span>
+                        </div>
+                    `).join('');
+                }
+                
+                // Initialize Chat Select options (Rename dynamically based on user projects)
+                const s = this.data.currentUser;
+                const select = document.getElementById('chat-project-select');
+                select.innerHTML = `
+                    <option value="1">Team 1: ${s.p1 || 'Not Assigned'}</option>
+                    <option value="2">Team 2: ${s.p2 || 'Not Assigned'}</option>
+                `;
+                
+                this.renderChat();
+            },
+            
+            renderChat() {
+                const s = this.data.currentUser;
+                const projNum = document.getElementById('chat-project-select').value;
+                const projName = projNum === '1' ? s.p1 : s.p2;
+                const chatContainer = document.getElementById('chat-messages-container');
+                
+                if (!projName || projName === '-' || projName.trim() === '') {
+                    chatContainer.innerHTML = '<div class="text-center text-gray-500 py-10">You are not assigned to this project yet.</div>';
+                    return;
+                }
+                
+                const pKey = projName.trim();
+                
+                // Get messages specifically for this exact project name
+                const teamMessages = this.data.messages.filter(m => m.projectKey === pKey).sort((a,b) => new Date(a.date) - new Date(b.date));
+                
+                if (teamMessages.length === 0) {
+                    chatContainer.innerHTML = '<div class="text-center text-gray-500 py-10 text-sm">Start the conversation with your team!</div>';
+                    return;
+                }
+                
+                chatContainer.innerHTML = teamMessages.map(m => {
+                    const isMe = m.srn === s.srn;
+                    return `
+                        <div class="chat-bubble ${isMe ? 'chat-mine' : 'chat-other'}">
+                            <div class="chat-sender">${m.senderName}</div>
+                            <div>${m.text}</div>
+                            <span class="chat-meta">${new Date(m.date).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
+                        </div>
+                    `;
+                }).join('');
+                
+                // Auto scroll to bottom
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+            },
+            
+            sendChatMessage(e) {
+                e.preventDefault();
+                const s = this.data.currentUser;
+                const projNum = document.getElementById('chat-project-select').value;
+                const projName = projNum === '1' ? s.p1 : s.p2;
+                
+                if (!projName || projName === '-' || projName.trim() === '') {
+                    this.showToast('You must be assigned to a project to chat', 'error');
+                    return;
+                }
+                
+                const input = document.getElementById('chat-input');
+                const text = input.value.trim();
+                if (!text) return;
+                
+                const id = Date.now().toString();
+                this.setDbDoc('smps_messages', id, {
+                    id, 
+                    projectKey: projName.trim(), 
+                    srn: s.srn, 
+                    senderName: s.name, 
+                    text: text, 
+                    date: new Date().toISOString()
+                });
+                
+                input.value = '';
+            },
 
             renderStudentTimetable() {
                 const tbody = document.getElementById('student-timetable-body');
@@ -2185,12 +2444,20 @@
 
             switchStudentTab(tabName) {
                 this.closeSidebar();
-                ['dashboard', 'projects', 'timetable', 'resources'].forEach(t => {
+                ['dashboard', 'projects', 'communication', 'timetable', 'resources'].forEach(t => {
                     document.getElementById(`student-tab-${t}`).classList.add('hidden');
                     document.getElementById(`nav-student-${t}`).classList.remove('active');
                 });
                 document.getElementById(`student-tab-${tabName}`).classList.remove('hidden');
                 document.getElementById(`nav-student-${tabName}`).classList.add('active');
+                
+                // If switching to communication, re-scroll chat to bottom
+                if (tabName === 'communication') {
+                    setTimeout(() => {
+                        const chatContainer = document.getElementById('chat-messages-container');
+                        if (chatContainer) chatContainer.scrollTop = chatContainer.scrollHeight;
+                    }, 50);
+                }
             },
 
             markAttendance(subjectId) {

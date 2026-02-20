@@ -281,9 +281,9 @@
 </head>
 <body>
 
-    <!-- Local File Warning -->
+    <!-- Firebase Connection Error Display Box -->
     <div id="local-warning">
-        ⚠️ WARNING: You are opening this file locally (file://). Firebase blocks local connections for security. Please use the GitHub Pages live link!
+        ⚠️ Firebase Connection Warning
     </div>
 
     <!-- Notification Toast -->
@@ -927,7 +927,7 @@
         import { getFirestore, collection, onSnapshot, doc, setDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         // =========================================================================
-        // LIVE FIREBASE KEYS INJECTED
+        // YOUR FIREBASE CONFIG KEYS 
         // =========================================================================
         const firebaseConfig = {
             apiKey: "AIzaSyDzb6k7kPIgZKrC_X_Y5e_9FLDLNcvo1dU",
@@ -946,7 +946,7 @@
         const appId = 'smps-tech-live';
         let firebaseUser = null;
 
-        // Check if page is loaded locally to show warning
+        // Display Warning if opening from local file://
         if (window.location.protocol === 'file:') {
             document.getElementById('local-warning').style.display = 'block';
         }
@@ -984,11 +984,10 @@
                     await signInAnonymously(auth);
                 } catch(e) {
                     console.error("Firebase Auth Error", e);
-                    if (window.location.protocol === 'file:') {
-                        this.showToast("Firebase blocks local connections. Please host on Netlify or Github Pages!", "error");
-                    } else {
-                        this.showToast("Database connection failed. Check Firebase Auth settings.", "error");
-                    }
+                    // If auth fails, show EXACTLY why on screen so user can fix it
+                    const warnBox = document.getElementById('local-warning');
+                    warnBox.innerHTML = `⚠️ <b>FIREBASE CONNECTION FAILED:</b> ${e.message}<br><br><b>Did you forget to add <code>vyomvadodariya.github.io</code> to the Authorized Domains list in Firebase -> Authentication -> Settings?</b>`;
+                    warnBox.style.display = 'block';
                 }
 
                 onAuthStateChanged(auth, user => {
@@ -1015,7 +1014,7 @@
 
             async setDbDoc(colName, id, dataObj) {
                 if (!firebaseUser) {
-                    this.showToast("Not connected to database.", "error");
+                    this.showToast("Cannot write to database. Connection failed.", "error");
                     return;
                 }
                 const ref = doc(db, 'artifacts', appId, 'public', 'data', colName, String(id));
@@ -1040,7 +1039,12 @@
                         this.data[key] = arr;
                         
                         this.refreshUI();
-                    }, (error) => console.error("Firestore error:", error));
+                    }, (error) => {
+                        console.error("Firestore error:", error);
+                        const warnBox = document.getElementById('local-warning');
+                        warnBox.innerHTML = `⚠️ <b>FIRESTORE DATABASE ERROR:</b> ${error.message}<br><br><b>Make sure your Firestore rules are set to Test Mode!</b>`;
+                        warnBox.style.display = 'block';
+                    });
                 });
             },
 
@@ -1062,7 +1066,7 @@
             // --- SEED DATABASE ---
             async seedStudents() {
                 if (!firebaseUser) {
-                    this.showToast("Cannot connect to Database. You are likely opening this file locally. Check github pages link!", "error");
+                    this.showToast("Cannot connect to Database. Fix errors above first!", "error");
                     return;
                 }
 
@@ -1106,7 +1110,7 @@
 
                 this.showToast('Pushing 33 students to live database. Please wait...', 'warning');
 
-                // We push each student sequentially so Firebase test mode doesn't throttle
+                // Push each student to db
                 for (let i = 0; i < baseStudents.length; i++) {
                     const s = baseStudents[i];
                     const srn = `SRN${String(i + 1).padStart(3, '0')}`;

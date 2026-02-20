@@ -2226,15 +2226,15 @@
                 
                 return mates.map(m => {
                     // Strip non-digits and grab last 10 digits to format robust Indian WhatsApp link
-                    const cleanPhone = m.phone ? m.phone.replace(/\\D/g, '').slice(-10) : '';
+                    const cleanPhone = m.phone ? m.phone.replace(/\D/g, '').slice(-10) : '';
+                    let contactHtml = '';
+                    if (m.email) contactHtml += `<div class="text-xs text-gray-500 truncate mb-1" title="${m.email}"><a href="https://mail.google.com/mail/?view=cm&fs=1&to=${m.email}" target="_blank" class="text-gray-500 hover:text-danger" style="text-decoration:none; transition: color 0.2s;"><i class="fas fa-envelope"></i> ${m.email}</a></div>`;
+                    if (m.phone) contactHtml += `<div class="text-xs text-gray-500 truncate mb-1" title="${m.phone}"><a href="https://wa.me/91${cleanPhone}" target="_blank" class="text-gray-500 hover:text-success" style="text-decoration:none; transition: color 0.2s;"><i class="fab fa-whatsapp"></i> ${m.phone}</a></div>`;
+                    
                     return `
                         <div class="bg-white border border-gray-200 p-2 rounded shadow-sm text-sm">
-                            <div class="font-bold text-dark">${m.name} <span class="text-xs font-normal text-gray-500 ml-1">(${m.dept})</span></div>
-                            <div class="flex gap-3 mt-1">
-                                ${m.phone ? `<a href="https://wa.me/91${cleanPhone}" target="_blank" class="text-success text-xs font-bold" style="text-decoration:none;"><i class="fab fa-whatsapp"></i> WhatsApp</a>` : ''}
-                                ${m.email ? `<a href="https://mail.google.com/mail/?view=cm&fs=1&to=${m.email}" target="_blank" class="text-danger text-xs font-bold" style="text-decoration:none;"><i class="fas fa-envelope"></i> Gmail</a>` : ''}
-                                ${!m.phone && !m.email ? `<span class="text-xs text-gray-400">No contact info</span>` : ''}
-                            </div>
+                            <div class="font-bold text-dark mb-1">${m.name} <span class="text-xs font-normal text-gray-500 ml-1">(${m.dept})</span></div>
+                            ${contactHtml || '<div class="text-xs text-gray-400">No contact info</div>'}
                         </div>
                     `;
                 }).join('');

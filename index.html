@@ -283,7 +283,7 @@
 
     <!-- Local File Warning -->
     <div id="local-warning">
-        ⚠️ WARNING: You are opening this file locally directly from your computer (file://). Firebase Database blocks local connections for security. Please upload to Netlify to test the database!
+        ⚠️ WARNING: You are opening this file locally (file://). Firebase blocks local connections for security. Please use the GitHub Pages live link!
     </div>
 
     <!-- Notification Toast -->
@@ -395,7 +395,7 @@
                 <div id="empty-db-warning" class="hidden mb-4 p-4 rounded" style="background: #FEF3C7; border-left: 5px solid #F59E0B;">
                     <h3 class="font-bold text-lg mb-2" style="color: #92400E;">Database is Empty!</h3>
                     <p style="color: #92400E;" class="mb-3">We detected that there are 0 students in your live database. Click the button below to instantly load the 33 assigned students.</p>
-                    <button onclick="App.seedStudents()" class="btn btn-primary">Load 33 Students Database</button>
+                    <button onclick="App.seedStudents()" class="btn btn-primary"><i class="fas fa-database"></i> Load 33 Students Database</button>
                 </div>
 
                 <div class="stats-grid">
@@ -927,7 +927,7 @@
         import { getFirestore, collection, onSnapshot, doc, setDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         // =========================================================================
-        // YOUR FIREBASE CONFIG KEYS 
+        // LIVE FIREBASE KEYS INJECTED
         // =========================================================================
         const firebaseConfig = {
             apiKey: "AIzaSyDzb6k7kPIgZKrC_X_Y5e_9FLDLNcvo1dU",
@@ -940,19 +940,15 @@
         };
         // =========================================================================
 
-        let app, auth, db;
+        let app = initializeApp(firebaseConfig);
+        let auth = getAuth(app);
+        let db = getFirestore(app);
         const appId = 'smps-tech-live';
         let firebaseUser = null;
 
         // Check if page is loaded locally to show warning
         if (window.location.protocol === 'file:') {
             document.getElementById('local-warning').style.display = 'block';
-        }
-
-        if (firebaseConfig.apiKey !== "REPLACE_ME") {
-            app = initializeApp(firebaseConfig);
-            auth = getAuth(app);
-            db = getFirestore(app);
         }
 
         const App = {
@@ -984,25 +980,23 @@
             ],
 
             async init() {
-                if (auth && db) {
-                    try {
-                        await signInAnonymously(auth);
-                    } catch(e) {
-                        console.error("Firebase Auth Error", e);
-                        if (window.location.protocol === 'file:') {
-                            this.showToast("Firebase blocks local connections. Please host on Netlify!", "error");
-                        } else {
-                            this.showToast("Database connection failed. Check Firebase Auth settings.", "error");
-                        }
+                try {
+                    await signInAnonymously(auth);
+                } catch(e) {
+                    console.error("Firebase Auth Error", e);
+                    if (window.location.protocol === 'file:') {
+                        this.showToast("Firebase blocks local connections. Please host on Netlify or Github Pages!", "error");
+                    } else {
+                        this.showToast("Database connection failed. Check Firebase Auth settings.", "error");
                     }
-
-                    onAuthStateChanged(auth, user => {
-                        firebaseUser = user;
-                        if (user) {
-                            this.listenToCollections();
-                        }
-                    });
                 }
+
+                onAuthStateChanged(auth, user => {
+                    firebaseUser = user;
+                    if (user) {
+                        this.listenToCollections();
+                    }
+                });
                 
                 const session = sessionStorage.getItem('smps_session');
                 if (session) {
@@ -1021,7 +1015,7 @@
 
             async setDbDoc(colName, id, dataObj) {
                 if (!firebaseUser) {
-                    this.showToast("Not connected to database. Please refresh or host on Netlify.", "error");
+                    this.showToast("Not connected to database.", "error");
                     return;
                 }
                 const ref = doc(db, 'artifacts', appId, 'public', 'data', colName, String(id));
@@ -1068,7 +1062,7 @@
             // --- SEED DATABASE ---
             async seedStudents() {
                 if (!firebaseUser) {
-                    this.showToast("Cannot connect to Database. You are likely opening this file locally. Host it on Netlify first!", "error");
+                    this.showToast("Cannot connect to Database. You are likely opening this file locally. Check github pages link!", "error");
                     return;
                 }
 
@@ -1110,6 +1104,9 @@
                     { name: 'Sumith S Kamble', p1: 'Industry Entry Level R&D', p2: 'Rectifier Charger', dept: 'ECE', sem: '5' }
                 ];
 
+                this.showToast('Pushing 33 students to live database. Please wait...', 'warning');
+
+                // We push each student sequentially so Firebase test mode doesn't throttle
                 for (let i = 0; i < baseStudents.length; i++) {
                     const s = baseStudents[i];
                     const srn = `SRN${String(i + 1).padStart(3, '0')}`;
@@ -1121,7 +1118,7 @@
                 await this.setDbDoc('smps_timetable', '2', { id: '2', day: 'Tuesday', time: '10:00 - 11:00', subject: 'Web Development' });
                 await this.setDbDoc('smps_resources', '1', { id: '1', title: 'DS Lecture Notes', type: 'pdf', desc: 'Unit 1 & 2', url: '#' });
 
-                this.showToast('Database successfully seeded with 33 Students!');
+                this.showToast('Database successfully seeded with 33 Students!', 'success');
             },
 
             /* --- NAVIGATION & VIEWS --- */
@@ -1297,7 +1294,7 @@
                 document.getElementById('vp-p1').innerText = student.p1 || 'Not assigned';
                 document.getElementById('vp-p2').innerText = student.p2 || 'Not assigned';
 
-                const logs = this.data.progressLogs.filter(l => l.srn === srn).reverse();
+                const logs = this.data.progressLogs.filter(l => l.srn === srn).sort((a,b) => new Date(b.date) - new Date(a.date));
                 const container = document.getElementById('admin-progress-timeline');
                 
                 if (logs.length === 0) {
@@ -1451,7 +1448,6 @@
                 document.getElementById('admin-page-title').innerText = titles[tabName];
             },
 
-            // --- Admin: Student Modals ---
             createStudent(e) {
                 e.preventDefault();
                 const name = document.getElementById('new-name').value;
@@ -1471,7 +1467,6 @@
                 this.toggleModal('modal-create-student');
                 e.target.reset();
                 this.showToast(`Student Created! SRN: ${srn}`, 'success');
-                this.switchAdminTab('students');
             },
 
             openEditModal(srn) {
@@ -1507,7 +1502,6 @@
                 }
             },
 
-            // --- Admin: Generic Methods ---
             addTimetableEntry(e) { 
                 e.preventDefault(); 
                 const id = Date.now().toString();
@@ -1702,7 +1696,7 @@
                 document.getElementById('st-proj1-name').innerText = s.p1 || "Not Assigned";
                 document.getElementById('st-proj2-name').innerText = s.p2 || "Not Assigned";
 
-                const myLogs = this.data.progressLogs.filter(l => l.srn === s.srn).reverse();
+                const myLogs = this.data.progressLogs.filter(l => l.srn === s.srn).sort((a,b) => new Date(b.date) - new Date(a.date));
                 const container = document.getElementById('student-progress-timeline');
                 
                 if (myLogs.length === 0) {

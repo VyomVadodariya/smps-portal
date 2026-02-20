@@ -1,0 +1,1862 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SMPS Tech - Unified Student Portal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <style>
+        :root {
+            --primary: #4F46E5;
+            --primary-dark: #4338ca;
+            --secondary: #10B981;
+            --danger: #EF4444;
+            --warning: #F59E0B;
+            --dark: #1F2937;
+            --light: #F3F4F6;
+            --white: #ffffff;
+            --gray: #9CA3AF;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background-color: var(--light);
+            color: var(--dark);
+            min-height: 100vh;
+        }
+
+        /* Utility Classes */
+        .hidden { display: none !important; }
+        .flex { display: flex; }
+        .grid { display: grid; }
+        .items-center { align-items: center; }
+        .justify-between { justify-content: space-between; }
+        .justify-center { justify-content: center; }
+        .text-center { text-align: center; }
+        .w-full { width: 100%; }
+        .mb-2 { margin-bottom: 0.5rem; }
+        .mb-4 { margin-bottom: 1rem; }
+        .mt-4 { margin-top: 1rem; }
+        .p-4 { padding: 1rem; }
+        .gap-2 { gap: 0.5rem; }
+        .gap-4 { gap: 1rem; }
+        .text-success { color: var(--secondary); }
+        .text-danger { color: var(--danger); }
+        .text-warning { color: var(--warning); }
+        .text-primary { color: var(--primary); }
+
+        /* Buttons */
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 500;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .btn:disabled { opacity: 0.6; cursor: not-allowed; }
+        .btn-primary { background: var(--primary); color: var(--white); }
+        .btn-primary:hover:not(:disabled) { background: var(--primary-dark); transform: translateY(-1px); }
+        .btn-outline { border: 2px solid var(--primary); color: var(--primary); background: transparent; }
+        .btn-outline:hover:not(:disabled) { background: var(--primary); color: var(--white); }
+        .btn-danger { background: var(--danger); color: var(--white); }
+        .btn-success { background: var(--secondary); color: var(--white); }
+        .btn-sm { padding: 0.4rem 0.8rem; font-size: 0.875rem; }
+
+        /* Navigation */
+        .navbar {
+            background: var(--white);
+            padding: 1rem 5%;
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 50;
+        }
+        .nav-logo { font-size: 1.5rem; font-weight: 700; color: var(--primary); }
+        
+        /* Hero Section */
+        .hero {
+            padding: 4rem 5%;
+            min-height: 80vh;
+            display: flex;
+            align-items: center;
+            background: linear-gradient(135deg, #e0e7ff 0%, #ffffff 100%);
+        }
+        .hero-content h1 { font-size: 3.5rem; line-height: 1.2; margin-bottom: 1.5rem; }
+        .hero-content span { color: var(--primary); }
+        .hero-img i { font-size: 15rem; color: var(--primary); opacity: 0.1; }
+
+        /* Authentication Forms */
+        .auth-container {
+            max-width: 450px;
+            margin: 4rem auto;
+            background: var(--white);
+            padding: 2.5rem;
+            border-radius: 16px;
+            box-shadow: var(--shadow);
+            width: 90%;
+        }
+        .form-group label { display: block; margin-bottom: 0.5rem; font-weight: 500; }
+        .form-control {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.2s;
+        }
+        .form-control:focus { outline: none; border-color: var(--primary); }
+
+        /* Dashboard Layout */
+        .dashboard-layout {
+            display: grid;
+            grid-template-columns: 250px 1fr;
+            min-height: 100vh;
+        }
+        
+        /* Sidebar */
+        .sidebar {
+            background: var(--dark);
+            color: var(--white);
+            padding: 2rem 1rem;
+        }
+        .sidebar-header { margin-bottom: 2rem; padding-bottom: 1rem; border-bottom: 1px solid #374151; }
+        .nav-item {
+            display: block;
+            padding: 1rem;
+            color: #9CA3AF;
+            text-decoration: none;
+            border-radius: 8px;
+            margin-bottom: 0.5rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .nav-item:hover, .nav-item.active { background: var(--primary); color: var(--white); }
+        .nav-item i { width: 24px; }
+
+        /* Main Content */
+        .main-content { padding: 2rem; overflow-y: auto; }
+        .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; }
+        
+        /* Cards & Stats */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        .stat-card {
+            background: var(--white);
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            border-left: 5px solid var(--primary);
+        }
+        .stat-card h3 { color: var(--gray); font-size: 0.875rem; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem;}
+        .stat-card .value { font-size: 2rem; font-weight: 700; color: var(--dark); margin-top: 0.5rem; }
+
+        /* Tables */
+        .table-container {
+            background: var(--white);
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            margin-bottom: 2rem;
+        }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 1rem; text-align: left; border-bottom: 1px solid #f3f4f6; }
+        th { background: #f9fafb; font-weight: 600; color: #4b5563; }
+        tr:hover { background: #f9fafb; }
+        
+        /* Badges */
+        .badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        .badge-success { background: #D1FAE5; color: #065F46; }
+        .badge-warning { background: #FEF3C7; color: #92400E; }
+        .badge-danger { background: #FEE2E2; color: #991B1B; }
+        .badge-primary { background: #e0e7ff; color: var(--primary-dark); }
+
+        /* Modals */
+        .modal-overlay {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 10000;
+            padding: 1rem;
+        }
+        .modal-content {
+            background: white; padding: 1.5rem; border-radius: 0.5rem; width: 100%; max-width: 32rem; max-height: 90vh; overflow-y: auto;
+        }
+
+        /* Timeline / Logs */
+        .log-item {
+            border-left: 2px solid var(--primary);
+            padding-left: 1rem;
+            position: relative;
+            margin-bottom: 1.5rem;
+        }
+        .log-item::before {
+            content: ''; position: absolute; left: -6px; top: 0; width: 10px; height: 10px; border-radius: 50%; background: var(--primary);
+        }
+        .log-date { font-size: 0.8rem; color: var(--gray); margin-bottom: 0.25rem; display: flex; justify-content: space-between; align-items: center;}
+        .log-text { font-size: 0.95rem; color: var(--dark); background: var(--light); padding: 0.75rem; border-radius: 8px; margin-top: 0.5rem; word-break: break-word;}
+        .log-file { display: inline-flex; align-items: center; gap: 0.5rem; margin-top: 0.5rem; font-size: 0.85rem; padding: 0.4rem 0.8rem; background: #e0e7ff; color: var(--primary-dark); border-radius: 6px; text-decoration: none;}
+        .log-file:hover { background: #c7d2fe; }
+
+        /* Responsive Elements */
+        .mobile-menu-btn {
+            display: none;
+            background: transparent;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--dark);
+        }
+        .sidebar-close-btn { display: none; background: transparent; border: none; font-size: 1.5rem; cursor: pointer; color: var(--white); }
+
+        @media (max-width: 768px) {
+            .hero { flex-direction: column; text-align: center; padding: 2rem 5%; }
+            .hero-content h1 { font-size: 2.5rem; }
+            .hero-img { display: none; }
+            
+            .dashboard-layout { grid-template-columns: 1fr; }
+            .main-content { padding: 1rem; }
+            .mobile-menu-btn { display: block; }
+            
+            .sidebar { 
+                display: none; 
+            } 
+            .sidebar.mobile-open { 
+                display: flex; 
+                flex-direction: column;
+                position: fixed; 
+                inset: 0; 
+                z-index: 5000; 
+                width: 260px;
+                max-width: 80vw;
+                box-shadow: 4px 0 15px rgba(0,0,0,0.5);
+            }
+            .sidebar.mobile-open .sidebar-close-btn { display: block; }
+
+            .page-header h2 { font-size: 1.25rem; }
+            .stat-card .value { font-size: 1.5rem; }
+            
+            th, td { padding: 0.75rem; font-size: 0.85rem; }
+        }
+
+        /* Notifications */
+        .toast {
+            position: fixed; bottom: 20px; right: 20px; padding: 1rem 2rem; background: var(--dark); color: var(--white);
+            border-radius: 8px; box-shadow: var(--shadow); transform: translateY(150%); transition: transform 0.3s ease; z-index: 100000;
+        }
+        .toast.show { transform: translateY(0); }
+        .toast.success { border-left: 4px solid var(--secondary); }
+        .toast.error { border-left: 4px solid var(--danger); }
+        
+        #local-warning {
+            display: none;
+            background: var(--danger);
+            color: white;
+            text-align: center;
+            padding: 1rem;
+            font-weight: bold;
+            z-index: 999999;
+            position: relative;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Local File Warning -->
+    <div id="local-warning">
+        ⚠️ WARNING: You are opening this file locally directly from your computer (file://). Firebase Database blocks local connections for security. Please upload to Netlify to test the database!
+    </div>
+
+    <!-- Notification Toast -->
+    <div id="toast" class="toast">Action Successful</div>
+
+    <!-- VIEW: LANDING PAGE -->
+    <div id="view-landing" class="">
+        <nav class="navbar flex justify-between items-center">
+            <div class="nav-logo"><i class="fas fa-graduation-cap"></i> SMPS Tech</div>
+            <div class="flex gap-2">
+                <button onclick="App.showAuth('student')" class="btn btn-primary btn-sm">Student</button>
+                <button onclick="App.showAuth('admin')" class="btn btn-outline btn-sm">Admin</button>
+            </div>
+        </nav>
+
+        <section class="hero container">
+            <div class="hero-content w-full">
+                <h1>Manage Your <br><span>Academic & Project Journey</span></h1>
+                <p class="mb-4" style="font-size: 1.1rem; color: #666; max-width: 600px;">
+                    A unified platform for students and administrators. Track 2-time daily attendance, manage subjects, submit daily project progress for approval, and streamline the academic lifecycle.
+                </p>
+                <div class="flex gap-4" style="flex-wrap: wrap;">
+                    <button onclick="App.showAuth('student')" class="btn btn-primary">Get Started</button>
+                </div>
+                
+                <!-- Demo Credentials Box -->
+                <div class="mt-4 p-4" style="background: #e0e7ff; border-radius: 8px; display: inline-block; max-width: 100%; word-wrap: break-word;">
+                    <p class="font-bold mb-2">🚀 System Active (Cloud DB Connected):</p>
+                    <p><strong>Admin:</strong> admin@smps.edu / admin123</p>
+                    <p><strong>Students:</strong> SRN001 to SRN033 / student123</p>
+                </div>
+            </div>
+            <div class="hero-img w-full flex justify-center">
+                <i class="fas fa-university"></i>
+            </div>
+        </section>
+    </div>
+
+    <!-- VIEW: AUTHENTICATION -->
+    <div id="view-auth" class="hidden">
+        <div class="navbar flex justify-between items-center">
+            <div class="nav-logo" style="cursor: pointer;" onclick="App.showLanding()">SMPS Tech</div>
+            <button onclick="App.showLanding()" class="btn btn-sm btn-outline">Home</button>
+        </div>
+
+        <div class="auth-container mt-4">
+            <div class="text-center mb-4">
+                <h2 id="auth-title" class="mb-2" style="font-size: 1.75rem;">Login</h2>
+                <p class="text-gray-500">Please enter your credentials</p>
+            </div>
+            <form id="login-form" onsubmit="App.handleLogin(event)">
+                <div class="form-group mb-4">
+                    <label>Email / SRN</label>
+                    <input type="text" id="login-id" class="form-control" placeholder="Enter Email or SRN" required>
+                </div>
+                <div class="form-group mb-4">
+                    <label>Password</label>
+                    <input type="password" id="login-pass" class="form-control" placeholder="••••••••" required>
+                </div>
+                <input type="hidden" id="login-type">
+                <button type="submit" class="btn btn-primary w-full justify-center">Sign In</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- VIEW: ADMIN DASHBOARD -->
+    <div id="view-admin" class="hidden dashboard-layout">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="admin-sidebar">
+            <div class="sidebar-header flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <i class="fas fa-user-shield"></i>
+                    <span class="font-bold">Admin Portal</span>
+                </div>
+                <button onclick="App.toggleSidebar('admin-sidebar')" class="sidebar-close-btn"><i class="fas fa-times"></i></button>
+            </div>
+            <nav>
+                <a onclick="App.switchAdminTab('overview')" id="nav-admin-overview" class="nav-item active"><i class="fas fa-chart-pie"></i> Overview</a>
+                <a onclick="App.switchAdminTab('students')" id="nav-admin-students" class="nav-item"><i class="fas fa-users"></i> Manage Students</a>
+                <a onclick="App.switchAdminTab('projects')" id="nav-admin-projects" class="nav-item"><i class="fas fa-tasks"></i> Student Projects</a>
+                <a onclick="App.switchAdminTab('timetable')" id="nav-admin-timetable" class="nav-item"><i class="fas fa-calendar-alt"></i> Manage Timetable</a>
+                <a onclick="App.switchAdminTab('resources')" id="nav-admin-resources" class="nav-item"><i class="fas fa-folder-open"></i> Manage Resources</a>
+                <a onclick="App.switchAdminTab('approvals')" id="nav-admin-approvals" class="nav-item">
+                    <i class="fas fa-check-double"></i> Daily Att. & Approvals 
+                    <span id="badge-count" class="badge badge-warning" style="margin-left: auto;">0</span>
+                </a>
+            </nav>
+            <div style="margin-top: auto; padding-top: 2rem;">
+                <button onclick="App.logout()" class="btn btn-danger w-full justify-center"><i class="fas fa-sign-out-alt"></i> Logout</button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="page-header">
+                <div class="flex items-center gap-4">
+                    <button onclick="App.toggleSidebar('admin-sidebar')" class="mobile-menu-btn"><i class="fas fa-bars"></i></button>
+                    <h2 id="admin-page-title">Dashboard Overview</h2>
+                </div>
+                <div class="flex items-center gap-2 hidden md:flex">
+                    <span>Welcome, Admin</span>
+                    <div style="width: 40px; height: 40px; background: #E5E7EB; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--dark);"><i class="fas fa-user"></i></div>
+                </div>
+            </header>
+
+            <!-- Admin: Overview Tab -->
+            <div id="admin-tab-overview">
+                <!-- IMPORTANT: Data Setup Box if DB is empty -->
+                <div id="empty-db-warning" class="hidden mb-4 p-4 rounded" style="background: #FEF3C7; border-left: 5px solid #F59E0B;">
+                    <h3 class="font-bold text-lg mb-2" style="color: #92400E;">Database is Empty!</h3>
+                    <p style="color: #92400E;" class="mb-3">We detected that there are 0 students in your live database. Click the button below to instantly load the 33 assigned students.</p>
+                    <button onclick="App.seedStudents()" class="btn btn-primary">Load 33 Students Database</button>
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <h3>Total Students</h3>
+                        <div class="value" id="stat-total-students">0</div>
+                    </div>
+                    <div class="stat-card" style="border-left-color: var(--warning);">
+                        <h3>Pending Approvals (All)</h3>
+                        <div class="value" id="stat-pending-approvals">0</div>
+                    </div>
+                    <div class="stat-card" style="border-left-color: var(--secondary);">
+                        <h3>Total Project Logs</h3>
+                        <div class="value" id="stat-total-logs">0</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Admin: Students Tab -->
+            <div id="admin-tab-students" class="hidden">
+                <div class="table-container p-4">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3>Student Directory</h3>
+                        <button onclick="App.toggleModal('modal-create-student')" class="btn btn-primary btn-sm"><i class="fas fa-plus"></i> Add Student</button>
+                    </div>
+                    <div style="overflow-x: auto;">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>SRN</th>
+                                    <th>Name</th>
+                                    <th>Dept</th>
+                                    <th>Sem</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="student-list-body">
+                                <!-- Populated by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Admin: Projects Tab -->
+            <div id="admin-tab-projects" class="hidden">
+                <div class="table-container p-4">
+                    <h3 class="mb-4">Student Project Tracking & Approvals</h3>
+                    <div style="overflow-x: auto;">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Student</th>
+                                    <th>Project 1</th>
+                                    <th>Project 2</th>
+                                    <th>Last Update</th>
+                                    <th>Pending Logs</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="admin-projects-body">
+                                <!-- Populated by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Admin: Timetable Tab -->
+            <div id="admin-tab-timetable" class="hidden">
+                <div class="table-container p-4">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3>Timetable Management</h3>
+                        <button onclick="App.toggleModal('modal-add-timetable')" class="btn btn-primary btn-sm"><i class="fas fa-plus"></i> Add Class</button>
+                    </div>
+                    <div style="overflow-x: auto;">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Day</th>
+                                    <th>Time</th>
+                                    <th>Subject</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="admin-timetable-body">
+                                <!-- Populated by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Admin: Resources Tab -->
+            <div id="admin-tab-resources" class="hidden">
+                <div class="table-container p-4">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3>Resources Management</h3>
+                        <button onclick="App.toggleModal('modal-add-resource')" class="btn btn-primary btn-sm"><i class="fas fa-plus"></i> Add Resource</button>
+                    </div>
+                    <div style="overflow-x: auto;">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Title</th>
+                                    <th>Type</th>
+                                    <th>Description</th>
+                                    <th>Link / File</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="admin-resources-body">
+                                <!-- Populated by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Admin: Approvals Tab -->
+            <div id="admin-tab-approvals" class="hidden">
+                
+                <div class="table-container p-4">
+                    <h3 class="mb-4">Today's Campus Daily Attendance</h3>
+                    <p class="text-sm text-gray-500 mb-4">Approve both Morning and Evening requests to mark a student 'Present'. You can also manually edit a student's status.</p>
+                    <div style="overflow-x: auto;">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Student</th>
+                                    <th>Morning Shift</th>
+                                    <th>Evening Shift</th>
+                                    <th>Final Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="admin-daily-att-body">
+                                <!-- Populated by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="table-container p-4 mt-4">
+                    <h3 class="mb-4">Subject Attendance Requests</h3>
+                    <div style="overflow-x: auto;">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Student</th>
+                                    <th>Subject</th>
+                                    <th>Date</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="approval-list-body">
+                                <!-- Populated by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- VIEW: STUDENT DASHBOARD -->
+    <div id="view-student" class="hidden dashboard-layout">
+        <aside class="sidebar" id="student-sidebar">
+            <div class="sidebar-header flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <i class="fas fa-user-graduate"></i>
+                    <span class="font-bold">Student Portal</span>
+                </div>
+                <button onclick="App.toggleSidebar('student-sidebar')" class="sidebar-close-btn"><i class="fas fa-times"></i></button>
+            </div>
+            <nav>
+                <a onclick="App.switchStudentTab('dashboard')" id="nav-student-dashboard" class="nav-item active"><i class="fas fa-home"></i> My Dashboard</a>
+                <a onclick="App.switchStudentTab('projects')" id="nav-student-projects" class="nav-item"><i class="fas fa-project-diagram"></i> My Projects</a>
+                <a onclick="App.switchStudentTab('timetable')" id="nav-student-timetable" class="nav-item"><i class="fas fa-calendar"></i> Timetable</a>
+                <a onclick="App.switchStudentTab('resources')" id="nav-student-resources" class="nav-item"><i class="fas fa-book"></i> Resources</a>
+            </nav>
+            <div style="margin-top: auto; padding-top: 2rem;">
+                <button onclick="App.logout()" class="btn btn-danger w-full justify-center"><i class="fas fa-sign-out-alt"></i> Logout</button>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <header class="page-header">
+                <div class="flex items-center gap-4">
+                    <button onclick="App.toggleSidebar('student-sidebar')" class="mobile-menu-btn"><i class="fas fa-bars"></i></button>
+                    <div>
+                        <h2 id="student-name-display" style="font-size: 1.25rem;">Student Name</h2>
+                        <p class="text-gray-500 text-sm" id="student-srn-display">SRN: ...</p>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Student: Dashboard Tab -->
+            <div id="student-tab-dashboard">
+                
+                <!-- 2-Time Daily Attendance Widget -->
+                <div class="stat-card mb-4" style="border-left-color: var(--primary);">
+                    <div class="flex justify-between items-center mb-4 flex-wrap gap-2">
+                        <h3 style="margin-bottom: 0;"><i class="fas fa-clock"></i> Today's Campus Attendance</h3>
+                        <span id="daily-att-date" class="text-sm font-bold text-gray-500"></span>
+                    </div>
+                    <div class="flex gap-4 items-center" style="flex-wrap: wrap;">
+                        <div class="flex-1 p-3 bg-light rounded text-center" style="min-width: 150px;">
+                            <p class="font-bold mb-2">Morning Shift</p>
+                            <div id="st-morning-status"></div>
+                        </div>
+                        <div class="flex-1 p-3 bg-light rounded text-center" style="min-width: 150px;">
+                            <p class="font-bold mb-2">Evening Shift</p>
+                            <div id="st-evening-status"></div>
+                        </div>
+                        <div class="flex-1 p-3 text-center" style="min-width: 150px;">
+                            <p class="font-bold mb-2">Overall Status</p>
+                            <h4 id="st-daily-final-status">Absent</h4>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <h3>Days Present (Campus)</h3>
+                        <div class="value" id="student-overall-att">0</div>
+                    </div>
+                    <div class="stat-card" style="border-left-color: var(--warning);">
+                        <h3>Subject Att. Pending</h3>
+                        <div class="value" id="student-pending-count">0</div>
+                    </div>
+                    <!-- Chart.js Pie Chart -->
+                    <div class="stat-card" style="border-left-color: var(--primary); display: flex; flex-direction: column;">
+                        <h3 class="mb-2">Campus Att. Overview</h3>
+                        <div style="height: 140px; width: 100%; position: relative;">
+                            <canvas id="attendancePieChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <h3 class="mb-4">My Subject Attendance</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="student-subjects-grid">
+                    <!-- Subject Cards injected here -->
+                </div>
+            </div>
+
+            <!-- Student: Projects Tab -->
+            <div id="student-tab-projects" class="hidden">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                    <!-- Project Details & Form -->
+                    <div>
+                        <div class="stat-card mb-4" style="border-left-color: var(--secondary);">
+                            <h3 class="text-primary font-bold"><i class="fas fa-tasks"></i> Assigned Projects</h3>
+                            <div class="mt-4">
+                                <p class="text-sm text-gray-500">Project 1:</p>
+                                <p class="font-bold mb-2" id="st-proj1-name">Loading...</p>
+                                <p class="text-sm text-gray-500">Project 2:</p>
+                                <p class="font-bold" id="st-proj2-name">Loading...</p>
+                            </div>
+                        </div>
+
+                        <div class="stat-card">
+                            <h3 class="mb-4">Submit Daily Progress</h3>
+                            <form onsubmit="App.submitProgress(event)">
+                                <div class="form-group mb-4">
+                                    <label>Select Project</label>
+                                    <select id="progress-project" class="form-control" required>
+                                        <option value="1">Project 1</option>
+                                        <option value="2">Project 2</option>
+                                    </select>
+                                </div>
+                                <div class="form-group mb-4">
+                                    <label>What did you accomplish today?</label>
+                                    <textarea id="progress-text" class="form-control" rows="4" placeholder="Describe your progress..." required></textarea>
+                                </div>
+                                <div class="form-group mb-4">
+                                    <label>Attach File (Optional)</label>
+                                    <input type="file" id="progress-file" class="form-control" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png">
+                                </div>
+                                <button type="submit" class="btn btn-primary w-full justify-center"><i class="fas fa-paper-plane"></i> Submit Progress</button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Progress Timeline -->
+                    <div class="stat-card">
+                        <h3 class="mb-4"><i class="fas fa-history"></i> My Progress History</h3>
+                        <div id="student-progress-timeline" style="max-height: 500px; overflow-y: auto; padding-right: 10px;">
+                            <!-- Populated by JS -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Student: Timetable Tab -->
+            <div id="student-tab-timetable" class="hidden">
+                <div class="table-container p-4">
+                    <h3 class="mb-4">My Schedule</h3>
+                    <div style="overflow-x: auto;">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Time / Day</th>
+                                    <th>Monday</th>
+                                    <th>Tuesday</th>
+                                    <th>Wednesday</th>
+                                    <th>Thursday</th>
+                                    <th>Friday</th>
+                                </tr>
+                            </thead>
+                            <tbody id="student-timetable-body">
+                                <!-- Populated by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Student: Resources Tab -->
+            <div id="student-tab-resources" class="hidden">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="student-resources-grid">
+                    <!-- Populated by JS -->
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- MODAL: View Progress (Admin) -->
+    <div id="modal-view-progress" class="hidden modal-overlay">
+        <div class="modal-content">
+            <div class="flex justify-between items-center mb-4">
+                <h3 id="vp-student-name">Student Progress</h3>
+                <button onclick="App.closeViewProgressModal()" class="btn btn-sm btn-outline"><i class="fas fa-times"></i></button>
+            </div>
+            
+            <div class="mb-4 p-3 bg-gray-100 rounded">
+                <p class="text-sm"><strong>P1:</strong> <span id="vp-p1"></span></p>
+                <p class="text-sm"><strong>P2:</strong> <span id="vp-p2"></span></p>
+            </div>
+
+            <div id="admin-progress-timeline">
+                <!-- Populated by JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: Create Student -->
+    <div id="modal-create-student" class="hidden modal-overlay">
+        <div class="modal-content">
+            <h3 class="mb-4">Register New Student</h3>
+            <form onsubmit="App.createStudent(event)">
+                <div class="form-group mb-2">
+                    <label>Full Name</label>
+                    <input type="text" id="new-name" class="form-control" required>
+                </div>
+                <div class="grid grid-cols-2 gap-2 mb-2">
+                    <div class="form-group">
+                        <label>Department</label>
+                        <select id="new-dept" class="form-control">
+                            <option value="CSE">CSE</option>
+                            <option value="ECE">ECE</option>
+                            <option value="ME">ME</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Semester</label>
+                        <select id="new-sem" class="form-control">
+                            <option value="1">1</option><option value="3">3</option>
+                            <option value="5">5</option><option value="7">7</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group mb-2">
+                    <label>Project 1</label>
+                    <input type="text" id="new-p1" class="form-control" placeholder="Project 1 Name" required>
+                </div>
+                <div class="form-group mb-4">
+                    <label>Project 2</label>
+                    <input type="text" id="new-p2" class="form-control" placeholder="Project 2 Name" required>
+                </div>
+                <div class="form-group mb-4">
+                    <label>Password</label>
+                    <input type="text" id="new-pass" class="form-control" value="student123" required>
+                    <small class="text-gray-500">Default: student123</small>
+                </div>
+                <div class="flex gap-2 justify-end">
+                    <button type="button" onclick="App.toggleModal('modal-create-student')" class="btn btn-outline">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Create</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: Edit Student -->
+    <div id="modal-edit-student" class="hidden modal-overlay">
+        <div class="modal-content">
+            <h3 class="mb-4">Edit Student Details</h3>
+            <form onsubmit="App.updateStudent(event)">
+                <input type="hidden" id="edit-srn-hidden">
+                <div class="form-group mb-2">
+                    <label>Full Name</label>
+                    <input type="text" id="edit-name" class="form-control" required>
+                </div>
+                <div class="grid grid-cols-2 gap-2 mb-2">
+                    <div class="form-group">
+                        <label>Department</label>
+                        <select id="edit-dept" class="form-control">
+                            <option value="CSE">CSE</option>
+                            <option value="ECE">ECE</option>
+                            <option value="ME">ME</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Semester</label>
+                        <select id="edit-sem" class="form-control">
+                            <option value="1">1</option><option value="3">3</option>
+                            <option value="5">5</option><option value="7">7</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group mb-2">
+                    <label>Project 1</label>
+                    <input type="text" id="edit-p1" class="form-control" required>
+                </div>
+                <div class="form-group mb-2">
+                    <label>Project 2</label>
+                    <input type="text" id="edit-p2" class="form-control" required>
+                </div>
+                <div class="form-group mb-4">
+                    <label>Password</label>
+                    <input type="text" id="edit-pass" class="form-control" required>
+                </div>
+                <div class="flex gap-2 justify-end">
+                    <button type="button" onclick="App.toggleModal('modal-edit-student')" class="btn btn-outline">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: Add Timetable -->
+    <div id="modal-add-timetable" class="hidden modal-overlay">
+        <div class="modal-content">
+            <h3 class="mb-4">Add Class to Timetable</h3>
+            <form onsubmit="App.addTimetableEntry(event)">
+                <div class="form-group mb-2">
+                    <label>Day of Week</label>
+                    <select id="tt-day" class="form-control" required>
+                        <option value="Monday">Monday</option>
+                        <option value="Tuesday">Tuesday</option>
+                        <option value="Wednesday">Wednesday</option>
+                        <option value="Thursday">Thursday</option>
+                        <option value="Friday">Friday</option>
+                    </select>
+                </div>
+                <div class="form-group mb-2">
+                    <label>Time Slot</label>
+                    <select id="tt-time" class="form-control" required>
+                        <option value="09:00 - 10:00">09:00 - 10:00</option>
+                        <option value="10:00 - 11:00">10:00 - 11:00</option>
+                        <option value="11:15 - 12:15">11:15 - 12:15</option>
+                        <option value="12:15 - 01:15">12:15 - 01:15</option>
+                    </select>
+                </div>
+                <div class="form-group mb-4">
+                    <label>Subject</label>
+                    <input type="text" id="tt-subject" class="form-control" placeholder="e.g. Data Structures" required>
+                </div>
+                <div class="flex gap-2 justify-end">
+                    <button type="button" onclick="App.toggleModal('modal-add-timetable')" class="btn btn-outline">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Add Entry</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: Add Resource -->
+    <div id="modal-add-resource" class="hidden modal-overlay">
+        <div class="modal-content">
+            <h3 class="mb-4">Add New Resource</h3>
+            <form onsubmit="App.addResource(event)">
+                <div class="form-group mb-2">
+                    <label>Resource Title</label>
+                    <input type="text" id="res-title" class="form-control" placeholder="e.g. Unit 1 Notes" required>
+                </div>
+                <div class="form-group mb-2">
+                    <label>Type</label>
+                    <select id="res-type" class="form-control" required>
+                        <option value="pdf">PDF Document</option>
+                        <option value="video">Video Tutorial</option>
+                        <option value="book">Book Reference</option>
+                        <option value="img">Image</option>
+                    </select>
+                </div>
+                
+                <div class="form-group mb-2">
+                    <label>Source Type</label>
+                    <div class="flex gap-4">
+                        <label><input type="radio" name="res-source" value="link" checked onchange="App.toggleResourceInput()"> External Link</label>
+                        <label><input type="radio" name="res-source" value="file" onchange="App.toggleResourceInput()"> Upload File</label>
+                    </div>
+                </div>
+
+                <div class="form-group mb-2" id="group-res-url">
+                    <label>Resource Link (URL)</label>
+                    <input type="url" id="res-url" class="form-control" placeholder="https://example.com/resource">
+                </div>
+
+                <div class="form-group mb-2 hidden" id="group-res-file">
+                    <label>Upload File</label>
+                    <input type="file" id="res-file" class="form-control" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx">
+                </div>
+
+                <div class="form-group mb-4">
+                    <label>Description</label>
+                    <input type="text" id="res-desc" class="form-control" placeholder="e.g. Chapter 1 summary" required>
+                </div>
+                <div class="flex gap-2 justify-end">
+                    <button type="button" onclick="App.toggleModal('modal-add-resource')" class="btn btn-outline">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Add Resource</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- FIREBASE MODULE LOGIC -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, onSnapshot, doc, setDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // =========================================================================
+        // YOUR FIREBASE CONFIG KEYS 
+        // =========================================================================
+        const firebaseConfig = {
+            apiKey: "AIzaSyDzb6k7kPIgZKrC_X_Y5e_9FLDLNcvo1dU",
+            authDomain: "smps-portal.firebaseapp.com",
+            projectId: "smps-portal",
+            storageBucket: "smps-portal.firebasestorage.app",
+            messagingSenderId: "113098150786",
+            appId: "1:113098150786:web:f502701777b37c440f759b",
+            measurementId: "G-98PEL2D3PR"
+        };
+        // =========================================================================
+
+        let app, auth, db;
+        const appId = 'smps-tech-live';
+        let firebaseUser = null;
+
+        // Check if page is loaded locally to show warning
+        if (window.location.protocol === 'file:') {
+            document.getElementById('local-warning').style.display = 'block';
+        }
+
+        if (firebaseConfig.apiKey !== "REPLACE_ME") {
+            app = initializeApp(firebaseConfig);
+            auth = getAuth(app);
+            db = getFirestore(app);
+        }
+
+        const App = {
+            data: {
+                students: [],
+                attendance: [],
+                dailyAttendance: [],
+                timetable: [],
+                resources: [],
+                progressLogs: [], 
+                currentUser: null
+            },
+            
+            chartInstance: null,
+            currentViewedSrn: null,
+
+            subjects: [
+                { id: 'sub1', name: 'Data Structures', code: 'CS301', total: 40 },
+                { id: 'sub2', name: 'Web Development', code: 'CS302', total: 35 },
+                { id: 'sub3', name: 'Operating Systems', code: 'CS303', total: 42 },
+                { id: 'sub4', name: 'Database Mgmt', code: 'CS304', total: 38 }
+            ],
+
+            timeSlots: [
+                "09:00 - 10:00",
+                "10:00 - 11:00",
+                "11:15 - 12:15",
+                "12:15 - 01:15"
+            ],
+
+            async init() {
+                if (auth && db) {
+                    try {
+                        await signInAnonymously(auth);
+                    } catch(e) {
+                        console.error("Firebase Auth Error", e);
+                        if (window.location.protocol === 'file:') {
+                            this.showToast("Firebase blocks local connections. Please host on Netlify!", "error");
+                        } else {
+                            this.showToast("Database connection failed. Check Firebase Auth settings.", "error");
+                        }
+                    }
+
+                    onAuthStateChanged(auth, user => {
+                        firebaseUser = user;
+                        if (user) {
+                            this.listenToCollections();
+                        }
+                    });
+                }
+                
+                const session = sessionStorage.getItem('smps_session');
+                if (session) {
+                    this.data.currentUser = JSON.parse(session);
+                    if (this.data.currentUser.role === 'admin') {
+                        this.hideAllViews();
+                        document.getElementById('view-admin').classList.remove('hidden');
+                    } else {
+                        this.hideAllViews();
+                        document.getElementById('view-student').classList.remove('hidden');
+                    }
+                } else {
+                    this.showLanding();
+                }
+            },
+
+            async setDbDoc(colName, id, dataObj) {
+                if (!firebaseUser) {
+                    this.showToast("Not connected to database. Please refresh or host on Netlify.", "error");
+                    return;
+                }
+                const ref = doc(db, 'artifacts', appId, 'public', 'data', colName, String(id));
+                await setDoc(ref, dataObj);
+            },
+
+            async delDbDoc(colName, id) {
+                if (!firebaseUser) return;
+                const ref = doc(db, 'artifacts', appId, 'public', 'data', colName, String(id));
+                await deleteDoc(ref);
+            },
+
+            listenToCollections() {
+                const cols = ['smps_students', 'smps_attendance', 'smps_dailyAttendance', 'smps_timetable', 'smps_resources', 'smps_progressLogs'];
+                
+                cols.forEach(colName => {
+                    const ref = collection(db, 'artifacts', appId, 'public', 'data', colName);
+                    onSnapshot(ref, (snapshot) => {
+                        const arr = [];
+                        snapshot.forEach(d => arr.push(d.data()));
+                        const key = colName.replace('smps_', '');
+                        this.data[key] = arr;
+                        
+                        this.refreshUI();
+                    }, (error) => console.error("Firestore error:", error));
+                });
+            },
+
+            refreshUI() {
+                if (this.data.currentUser) {
+                    if (this.data.currentUser.role === 'student') {
+                        const updatedUser = this.data.students.find(s => s.srn === this.data.currentUser.srn);
+                        if (updatedUser) this.data.currentUser = { ...updatedUser, role: 'student' };
+                        this.renderStudentDashboard();
+                    } else {
+                        this.renderAdminDashboard();
+                        if (this.currentViewedSrn && !document.getElementById('modal-view-progress').classList.contains('hidden')) {
+                            this.viewStudentProgress(this.currentViewedSrn);
+                        }
+                    }
+                }
+            },
+
+            // --- SEED DATABASE ---
+            async seedStudents() {
+                if (!firebaseUser) {
+                    this.showToast("Cannot connect to Database. You are likely opening this file locally. Host it on Netlify first!", "error");
+                    return;
+                }
+
+                if(!confirm("Are you sure you want to initialize the database with the 33 students?")) return;
+
+                const baseStudents = [
+                    { name: 'Sanjana G M', p1: 'Drone Detection Antenna', p2: 'Development of Antenna', dept: 'ECE', sem: '5' },
+                    { name: 'Varshini A R', p1: 'Drone Detection Antenna', p2: 'Drone Jammer Design', dept: 'ECE', sem: '5' },
+                    { name: 'Karthik Shivaram', p1: 'Drone Detection Antenna', p2: 'Drone Jammer Design', dept: 'ECE', sem: '5' },
+                    { name: 'Pradeep M', p1: 'Drone Detection Antenna', p2: 'Drone Jammer Design', dept: 'ECE', sem: '5' },
+                    { name: 'Rohan S R', p1: 'EV Charging Staion Reverse Engineering', p2: 'EV Charging Staion - Reverse Engineering', dept: 'CSE', sem: '5' },
+                    { name: 'Spandana Venkatesh', p1: 'EV Charging Staion Reverse Engineering', p2: 'Forward Canbus Communication', dept: 'ECE', sem: '5' },
+                    { name: 'Spoorthi HS', p1: 'Group 3 R&D', p2: 'IOT-Smart LCD System + Drone Jammer', dept: 'ECE', sem: '5' },
+                    { name: 'Spoorthi V N', p1: 'Group 3 R&D', p2: 'IOT-Smart LCD System + Drone Jammer', dept: 'ECE', sem: '5' },
+                    { name: 'Vinendrakumar', p1: 'Group 3 R&D', p2: 'Solar Hybrid System', dept: 'ECE', sem: '5' },
+                    { name: 'Amith', p1: 'Group 4 R&D', p2: 'Forward Canbus Communication', dept: 'ECE', sem: '5' },
+                    { name: 'Siri G Raghuram', p1: 'Group 4 R&D', p2: 'Canbus Communication -Forward Engineering', dept: 'ECE', sem: '5' },
+                    { name: 'Chandana N', p1: 'Group 4 R&D', p2: 'Forward Canbus Communication', dept: 'ECE', sem: '5' },
+                    { name: 'Amulya', p1: 'Group 4 R&D', p2: 'Micro Electronic Project', dept: 'ECE', sem: '5' },
+                    { name: 'Sanvi', p1: 'Group 4 R&D', p2: 'Development of Antenna', dept: 'ECE', sem: '5' },
+                    { name: 'Pooja M B', p1: 'Group 4 R&D', p2: 'Development of Antenna', dept: 'ECE', sem: '5' },
+                    { name: 'Dhruvitha K G', p1: 'SMPS Supply 12V 30A', p2: 'IOT-Smart LCD Data Encryption', dept: 'CSE', sem: '5' },
+                    { name: 'Ayush Babesh', p1: 'SMPS Supply 12V 30A', p2: 'IOT-Smart LCD System', dept: 'ECE', sem: '5' },
+                    { name: 'Chethan P', p1: 'SMPS Supply 12V 30A', p2: 'IOT-Smart LCD System', dept: 'ECE', sem: '5' },
+                    { name: 'Dhanush H', p1: 'SMPS Supply 12V 30A', p2: 'EV Charging Staion - Reverse Engineering', dept: 'ECE', sem: '5' },
+                    { name: 'Prajwal M P', p1: 'SMPS Supply 48V 50A', p2: 'Rectifier Charger Circuit', dept: 'ECE', sem: '5' },
+                    { name: 'Abhijeet Aste', p1: 'SMPS Supply 48V 50A', p2: 'Rectifier Charger', dept: 'ECE', sem: '5' },
+                    { name: 'Dileep Kuber Naik', p1: 'SMPS Supply 48V 50A', p2: 'Rectifier Charger', dept: 'ECE', sem: '5' },
+                    { name: 'Bharath G N', p1: 'SMPS Supply 48V 50A', p2: 'Industry Entry Level Project', dept: 'ECE', sem: '5' },
+                    { name: 'Kavyashree K', p1: 'SMPS Supply 24V 30A', p2: 'Reverse Engineering in some new product', dept: 'ECE', sem: '5' },
+                    { name: 'Akash HP', p1: 'SMPS Supply 24V 30A', p2: 'Drone Jammer Design', dept: 'ECE', sem: '5' },
+                    { name: 'Dhanush E', p1: 'SMPS Supply 24V 30A', p2: 'EV Charging Staion - Reverse Engineering', dept: 'ECE', sem: '5' },
+                    { name: 'Asif S Nadaf', p1: 'SMPS Supply 24V 30A', p2: 'Micro Electronic Project', dept: 'ECE', sem: '5' },
+                    { name: 'M Naveenkumar', p1: 'SMPS Supply 24V 30A', p2: 'CCNA Building Managemnent System', dept: 'EEE', sem: '5' },
+                    { name: 'Yashoda', p1: 'Industry Entry Level R&D', p2: 'Reverse Engineering in some new product', dept: 'ECE', sem: '5' },
+                    { name: 'Veekshitha k', p1: 'Industry Entry Level R&D', p2: 'Drone Jammer Design', dept: 'ECE', sem: '5' },
+                    { name: 'Veeresh', p1: 'Industry Entry Level R&D', p2: 'Drone Jammer Design', dept: 'ECE', sem: '5' },
+                    { name: 'Fairoz', p1: 'Industry Entry Level R&D', p2: 'Drone Jammer Design', dept: 'ECE', sem: '5' },
+                    { name: 'Sumith S Kamble', p1: 'Industry Entry Level R&D', p2: 'Rectifier Charger', dept: 'ECE', sem: '5' }
+                ];
+
+                for (let i = 0; i < baseStudents.length; i++) {
+                    const s = baseStudents[i];
+                    const srn = `SRN${String(i + 1).padStart(3, '0')}`;
+                    await this.setDbDoc('smps_students', srn, { ...s, srn, password: 'student123' });
+                }
+
+                // Seed some basic timetable/resources too
+                await this.setDbDoc('smps_timetable', '1', { id: '1', day: 'Monday', time: '09:00 - 10:00', subject: 'Data Structures' });
+                await this.setDbDoc('smps_timetable', '2', { id: '2', day: 'Tuesday', time: '10:00 - 11:00', subject: 'Web Development' });
+                await this.setDbDoc('smps_resources', '1', { id: '1', title: 'DS Lecture Notes', type: 'pdf', desc: 'Unit 1 & 2', url: '#' });
+
+                this.showToast('Database successfully seeded with 33 Students!');
+            },
+
+            /* --- NAVIGATION & VIEWS --- */
+            hideAllViews() {
+                ['view-landing', 'view-auth', 'view-admin', 'view-student'].forEach(id => {
+                    document.getElementById(id).classList.add('hidden');
+                });
+            },
+
+            showLanding() {
+                this.hideAllViews();
+                document.getElementById('view-landing').classList.remove('hidden');
+            },
+
+            showAuth(type) {
+                this.hideAllViews();
+                document.getElementById('view-auth').classList.remove('hidden');
+                document.getElementById('auth-title').innerText = type === 'admin' ? 'Admin Login' : 'Student Login';
+                document.getElementById('login-type').value = type;
+                document.getElementById('login-id').value = '';
+                document.getElementById('login-pass').value = '';
+            },
+
+            handleLogin(e) {
+                e.preventDefault();
+                const type = document.getElementById('login-type').value;
+                const id = document.getElementById('login-id').value;
+                const pass = document.getElementById('login-pass').value;
+
+                if (type === 'admin') {
+                    if (id === 'admin@smps.edu' && pass === 'admin123') {
+                        this.loginAdmin();
+                    } else {
+                        this.showToast('Invalid Admin Credentials', 'error');
+                    }
+                } else {
+                    const student = this.data.students.find(s => s.srn.toLowerCase() === id.toLowerCase() && s.password === pass);
+                    if (student) {
+                        this.loginStudent(student);
+                    } else {
+                        this.showToast('Invalid SRN or Password', 'error');
+                    }
+                }
+            },
+
+            loginAdmin() {
+                this.data.currentUser = { role: 'admin' };
+                sessionStorage.setItem('smps_session', JSON.stringify(this.data.currentUser));
+                this.hideAllViews();
+                document.getElementById('view-admin').classList.remove('hidden');
+                this.refreshUI();
+                this.showToast('Welcome back, Admin', 'success');
+            },
+
+            loginStudent(student) {
+                this.data.currentUser = { ...student, role: 'student' };
+                sessionStorage.setItem('smps_session', JSON.stringify(this.data.currentUser));
+                this.hideAllViews();
+                document.getElementById('view-student').classList.remove('hidden');
+                this.refreshUI();
+                this.showToast(`Welcome, ${student.name}`, 'success');
+            },
+
+            logout() {
+                this.data.currentUser = null;
+                sessionStorage.removeItem('smps_session');
+                this.showLanding();
+                this.showToast('Logged out successfully');
+            },
+
+            toggleSidebar(id) {
+                document.getElementById(id).classList.toggle('mobile-open');
+            },
+            closeSidebar() {
+                document.querySelectorAll('.sidebar').forEach(el => el.classList.remove('mobile-open'));
+            },
+
+            /* --- ADMIN LOGIC --- */
+            renderAdminDashboard() {
+                // Show Warning Box if no students exist
+                if(this.data.students.length === 0) {
+                    document.getElementById('empty-db-warning').classList.remove('hidden');
+                } else {
+                    document.getElementById('empty-db-warning').classList.add('hidden');
+                }
+
+                document.getElementById('stat-total-students').innerText = this.data.students.length;
+                
+                const pendingSubjectCount = this.data.attendance.filter(a => a.status === 'pending').length;
+                let pendingDailyCount = 0;
+                this.data.dailyAttendance.forEach(a => {
+                    if(a.morning === 'pending') pendingDailyCount++;
+                    if(a.evening === 'pending') pendingDailyCount++;
+                });
+                const totalPending = pendingSubjectCount + pendingDailyCount;
+
+                document.getElementById('stat-pending-approvals').innerText = totalPending;
+                document.getElementById('badge-count').innerText = totalPending;
+                document.getElementById('stat-total-logs').innerText = this.data.progressLogs.length;
+
+                const tbody = document.getElementById('student-list-body');
+                tbody.innerHTML = this.data.students.map(s => `
+                    <tr>
+                        <td class="font-bold text-primary">${s.srn}</td>
+                        <td>${s.name}</td>
+                        <td>${s.dept}</td>
+                        <td>${s.sem}</td>
+                        <td><button onclick="App.openEditModal('${s.srn}')" class="btn btn-sm btn-outline">Edit</button></td>
+                    </tr>
+                `).join('') || '<tr><td colspan="5" class="text-center">No students found</td></tr>';
+
+                this.renderAdminProjects();
+
+                const ttBody = document.getElementById('admin-timetable-body');
+                ttBody.innerHTML = this.data.timetable.map(t => `
+                    <tr>
+                        <td>${t.day}</td>
+                        <td>${t.time}</td>
+                        <td>${t.subject}</td>
+                        <td><button onclick="App.deleteTimetableEntry('${t.id}')" class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button></td>
+                    </tr>
+                `).join('') || '<tr><td colspan="4" class="text-center">No classes scheduled</td></tr>';
+
+                const resBody = document.getElementById('admin-resources-body');
+                resBody.innerHTML = this.data.resources.map(r => `
+                    <tr>
+                        <td class="font-bold">${r.title}</td>
+                        <td><span class="badge badge-success">${r.type.toUpperCase()}</span></td>
+                        <td>${r.desc}</td>
+                        <td>${r.url.startsWith('data:') ? '<span class="text-xs badge badge-warning">FILE</span>' : '<a href="'+r.url+'" target="_blank">Link <i class="fas fa-external-link-alt"></i></a>'}</td>
+                        <td><button onclick="App.deleteResource('${r.id}')" class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button></td>
+                    </tr>
+                `).join('') || '<tr><td colspan="5" class="text-center">No resources added</td></tr>';
+
+                this.renderApprovalsTable();
+            },
+
+            renderAdminProjects() {
+                const tbody = document.getElementById('admin-projects-body');
+                tbody.innerHTML = this.data.students.map(s => {
+                    const logs = this.data.progressLogs.filter(l => l.srn === s.srn);
+                    let lastUpdate = 'No Updates';
+                    let pendingCount = logs.filter(l => !l.status || l.status === 'pending').length;
+
+                    if(logs.length > 0) {
+                        lastUpdate = new Date(logs[logs.length-1].date).toLocaleDateString();
+                    }
+                    
+                    return `
+                        <tr>
+                            <td>
+                                <div class="font-bold">${s.name}</div>
+                                <div class="text-xs text-gray-500">${s.srn}</div>
+                            </td>
+                            <td class="text-sm">${s.p1 || '-'}</td>
+                            <td class="text-sm">${s.p2 || '-'}</td>
+                            <td><span class="badge badge-primary">${lastUpdate}</span></td>
+                            <td><span class="badge ${pendingCount > 0 ? 'badge-warning' : 'badge-success'}">${pendingCount} Pending</span></td>
+                            <td>
+                                <button onclick="App.viewStudentProgress('${s.srn}')" class="btn btn-sm btn-outline">Review Logs</button>
+                            </td>
+                        </tr>
+                    `;
+                }).join('') || '<tr><td colspan="6" class="text-center">No students found</td></tr>';
+            },
+
+            viewStudentProgress(srn) {
+                this.currentViewedSrn = srn;
+                const student = this.data.students.find(s => s.srn === srn);
+                if(!student) return;
+
+                document.getElementById('vp-student-name').innerText = student.name + " - Progress History";
+                document.getElementById('vp-p1').innerText = student.p1 || 'Not assigned';
+                document.getElementById('vp-p2').innerText = student.p2 || 'Not assigned';
+
+                const logs = this.data.progressLogs.filter(l => l.srn === srn).reverse();
+                const container = document.getElementById('admin-progress-timeline');
+                
+                if (logs.length === 0) {
+                    container.innerHTML = '<p class="text-center text-gray-500 py-4">No progress logs submitted yet.</p>';
+                } else {
+                    container.innerHTML = logs.map(l => {
+                        const projName = l.projectId === '1' ? student.p1 : student.p2;
+                        const fileAttachment = l.fileData ? `<a href="${l.fileData}" download="${l.fileName}" class="log-file"><i class="fas fa-paperclip"></i> ${l.fileName}</a>` : '';
+                        
+                        const isPending = !l.status || l.status === 'pending';
+                        const adminActions = isPending ? `
+                            <div class="mt-2 flex gap-2">
+                                <button onclick="App.processProgressLog('${l.id}', 'approved', '${srn}')" class="btn btn-sm btn-success"><i class="fas fa-check"></i> Approve</button>
+                                <button onclick="App.processProgressLog('${l.id}', 'rejected', '${srn}')" class="btn btn-sm btn-danger"><i class="fas fa-times"></i> Reject</button>
+                            </div>
+                        ` : `<div class="mt-2"><span class="badge badge-${l.status === 'approved' ? 'success' : 'danger'}"><i class="fas fa-${l.status === 'approved' ? 'check' : 'times'}"></i> ${l.status.toUpperCase()}</span></div>`;
+
+                        return `
+                            <div class="log-item">
+                                <div class="log-date">
+                                    <span>${new Date(l.date).toLocaleString()} • <span class="badge badge-primary">Project ${l.projectId}</span></span>
+                                </div>
+                                <div class="font-bold text-sm mb-1 text-primary">${projName}</div>
+                                <div class="log-text">${l.text}</div>
+                                ${fileAttachment}
+                                ${adminActions}
+                            </div>
+                        `;
+                    }).join('');
+                }
+
+                document.getElementById('modal-view-progress').classList.remove('hidden');
+            },
+
+            closeViewProgressModal() {
+                this.currentViewedSrn = null;
+                document.getElementById('modal-view-progress').classList.add('hidden');
+            },
+
+            processProgressLog(logId, newStatus, srn) {
+                const log = this.data.progressLogs.find(l => String(l.id) === String(logId));
+                if (log) {
+                    this.setDbDoc('smps_progressLogs', log.id, { ...log, status: newStatus });
+                    this.showToast(`Progress log ${newStatus}`, newStatus === 'approved' ? 'success' : 'error');
+                }
+            },
+
+            renderApprovalsTable() {
+                const today = new Date().toISOString().split('T')[0];
+                const dailyAttBody = document.getElementById('admin-daily-att-body');
+                
+                const renderAdminShiftStatus = (srn, shift, status) => {
+                    if (status === 'approved' || status === true) return `
+                        <div class="flex items-center gap-2">
+                            <span class="text-success font-bold"><i class="fas fa-check-circle"></i> Approved</span>
+                            <button onclick="App.processDailyAtt('${srn}', '${shift}', 'rejected')" class="btn btn-sm btn-outline text-danger" style="padding: 0.1rem 0.3rem;" title="Undo (Mark Absent)"><i class="fas fa-undo"></i></button>
+                        </div>
+                    `;
+                    if (status === 'pending') return `
+                        <div class="flex items-center gap-2">
+                            <span class="text-warning font-bold"><i class="fas fa-clock"></i> Pending</span>
+                            <button onclick="App.processDailyAtt('${srn}', '${shift}', 'approved')" class="btn btn-sm btn-success" style="padding: 0.2rem 0.4rem;" title="Approve"><i class="fas fa-check"></i></button>
+                            <button onclick="App.processDailyAtt('${srn}', '${shift}', 'rejected')" class="btn btn-sm btn-danger" style="padding: 0.2rem 0.4rem;" title="Reject"><i class="fas fa-times"></i></button>
+                        </div>
+                    `;
+                    return `
+                        <div class="flex items-center gap-2">
+                            <span class="text-gray-500"><i class="fas fa-minus-circle"></i> Not Marked</span>
+                            <button onclick="App.processDailyAtt('${srn}', '${shift}', 'approved')" class="btn btn-sm btn-outline text-success" style="padding: 0.1rem 0.3rem;" title="Force Mark Present"><i class="fas fa-check"></i></button>
+                        </div>
+                    `;
+                };
+
+                dailyAttBody.innerHTML = this.data.students.map(s => {
+                    const record = this.data.dailyAttendance.find(a => a.srn === s.srn && a.date === today);
+                    
+                    const mornHtml = renderAdminShiftStatus(s.srn, 'morning', record?.morning);
+                    const eveHtml = renderAdminShiftStatus(s.srn, 'evening', record?.evening);
+                    
+                    const isMorningApproved = record?.morning === 'approved' || record?.morning === true;
+                    const isEveningApproved = record?.evening === 'approved' || record?.evening === true;
+                    const finalStatus = (isMorningApproved && isEveningApproved) ? 'Present' : 'Absent';
+
+                    return `
+                        <tr>
+                            <td>
+                                <div class="font-bold">${s.name}</div>
+                                <div class="text-xs text-gray-500">${s.srn}</div>
+                            </td>
+                            <td>${mornHtml}</td>
+                            <td>${eveHtml}</td>
+                            <td><span class="badge badge-${finalStatus === 'Present' ? 'success' : 'danger'}">${finalStatus}</span></td>
+                        </tr>
+                    `;
+                }).join('');
+
+                const pending = this.data.attendance.filter(a => a.status === 'pending');
+                const tbody = document.getElementById('approval-list-body');
+                
+                if (pending.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="4" class="text-center p-4">No pending subject requests</td></tr>';
+                    return;
+                }
+
+                tbody.innerHTML = pending.map(req => {
+                    const student = this.data.students.find(s => s.srn === req.srn);
+                    const subject = this.subjects.find(s => s.id === req.subjectId);
+                    return `
+                        <tr>
+                            <td>
+                                <div class="font-bold">${student ? student.name : 'Unknown'}</div>
+                                <div style="font-size: 0.8rem; color: #666;">${req.srn}</div>
+                            </td>
+                            <td>${subject ? subject.name : 'Unknown'}</td>
+                            <td>${new Date(req.date).toLocaleDateString()}</td>
+                            <td>
+                                <button onclick="App.processAttendance('${req.id}', 'approved')" class="btn btn-sm btn-success"><i class="fas fa-check"></i></button>
+                                <button onclick="App.processAttendance('${req.id}', 'rejected')" class="btn btn-sm btn-danger"><i class="fas fa-times"></i></button>
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
+            },
+
+            processDailyAtt(srn, shift, status) {
+                const today = new Date().toISOString().split('T')[0];
+                let record = this.data.dailyAttendance.find(a => a.srn === srn && a.date === today);
+                let updatedRecord = record ? { ...record } : { id: Date.now().toString(), srn: srn, date: today, morning: false, evening: false };
+                updatedRecord[shift] = status === 'approved' ? 'approved' : false;
+                this.setDbDoc('smps_dailyAttendance', updatedRecord.id, updatedRecord);
+                this.showToast(`${shift.charAt(0).toUpperCase() + shift.slice(1)} attendance updated!`, status === 'approved' ? 'success' : 'error');
+            },
+
+            switchAdminTab(tabName) {
+                this.closeSidebar();
+                ['overview', 'students', 'projects', 'timetable', 'resources', 'approvals'].forEach(t => {
+                    document.getElementById(`admin-tab-${t}`).classList.add('hidden');
+                    document.getElementById(`nav-admin-${t}`).classList.remove('active');
+                });
+                document.getElementById(`admin-tab-${tabName}`).classList.remove('hidden');
+                document.getElementById(`nav-admin-${tabName}`).classList.add('active');
+                
+                const titles = { 
+                    overview: 'Dashboard Overview', 
+                    students: 'Student Directory', 
+                    projects: 'Student Project Tracking & Approvals',
+                    timetable: 'Manage Timetable',
+                    resources: 'Manage Resources',
+                    approvals: 'Daily Attendance & Approvals' 
+                };
+                document.getElementById('admin-page-title').innerText = titles[tabName];
+            },
+
+            // --- Admin: Student Modals ---
+            createStudent(e) {
+                e.preventDefault();
+                const name = document.getElementById('new-name').value;
+                const dept = document.getElementById('new-dept').value;
+                const sem = document.getElementById('new-sem').value;
+                const p1 = document.getElementById('new-p1').value;
+                const p2 = document.getElementById('new-p2').value;
+                const pass = document.getElementById('new-pass').value;
+                
+                let num = this.data.students.length + 1;
+                let srn = `SRN${String(num).padStart(3, '0')}`;
+                while(this.data.students.find(s=>s.srn===srn)) {
+                    num++; srn = `SRN${String(num).padStart(3, '0')}`;
+                }
+
+                this.setDbDoc('smps_students', srn, { srn, name, dept, sem, p1, p2, password: pass });
+                this.toggleModal('modal-create-student');
+                e.target.reset();
+                this.showToast(`Student Created! SRN: ${srn}`, 'success');
+                this.switchAdminTab('students');
+            },
+
+            openEditModal(srn) {
+                const student = this.data.students.find(s => s.srn === srn);
+                if(!student) return;
+                document.getElementById('edit-srn-hidden').value = srn;
+                document.getElementById('edit-name').value = student.name;
+                document.getElementById('edit-dept').value = student.dept;
+                document.getElementById('edit-sem').value = student.sem;
+                document.getElementById('edit-p1').value = student.p1 || '';
+                document.getElementById('edit-p2').value = student.p2 || '';
+                document.getElementById('edit-pass').value = student.password;
+                this.toggleModal('modal-edit-student');
+            },
+
+            updateStudent(e) {
+                e.preventDefault();
+                const srn = document.getElementById('edit-srn-hidden').value;
+                const student = this.data.students.find(s => s.srn === srn);
+                if (student) {
+                    const updatedStudent = { 
+                        ...student, 
+                        name: document.getElementById('edit-name').value, 
+                        dept: document.getElementById('edit-dept').value, 
+                        sem: document.getElementById('edit-sem').value, 
+                        p1: document.getElementById('edit-p1').value, 
+                        p2: document.getElementById('edit-p2').value, 
+                        password: document.getElementById('edit-pass').value 
+                    };
+                    this.setDbDoc('smps_students', srn, updatedStudent);
+                    this.toggleModal('modal-edit-student');
+                    this.showToast('Student Details Updated', 'success');
+                }
+            },
+
+            // --- Admin: Generic Methods ---
+            addTimetableEntry(e) { 
+                e.preventDefault(); 
+                const id = Date.now().toString();
+                this.setDbDoc('smps_timetable', id, { 
+                    id, 
+                    day: document.getElementById('tt-day').value, 
+                    time: document.getElementById('tt-time').value, 
+                    subject: document.getElementById('tt-subject').value 
+                });
+                this.toggleModal('modal-add-timetable'); 
+                document.getElementById('tt-subject').value = ''; 
+                this.showToast('Class added successfully'); 
+            },
+            deleteTimetableEntry(id) { 
+                if(confirm('Delete this class?')) { 
+                    this.delDbDoc('smps_timetable', id);
+                    this.showToast('Class deleted'); 
+                } 
+            },
+            toggleResourceInput() {
+                if(document.querySelector('input[name="res-source"]:checked').value === 'link') {
+                    document.getElementById('group-res-url').classList.remove('hidden'); document.getElementById('group-res-file').classList.add('hidden'); document.getElementById('res-url').required = true; document.getElementById('res-file').required = false;
+                } else {
+                    document.getElementById('group-res-url').classList.add('hidden'); document.getElementById('group-res-file').classList.remove('hidden'); document.getElementById('res-url').required = false; document.getElementById('res-file').required = true;
+                }
+            },
+            addResource(e) {
+                e.preventDefault();
+                const title = document.getElementById('res-title').value; const type = document.getElementById('res-type').value; const desc = document.getElementById('res-desc').value;
+                if (document.querySelector('input[name="res-source"]:checked').value === 'link') {
+                    this.saveResourceEntry(title, type, desc, document.getElementById('res-url').value);
+                } else {
+                    const file = document.getElementById('res-file').files[0];
+                    if (!file) return;
+                    const reader = new FileReader();
+                    reader.onload = (ev) => { this.saveResourceEntry(title, type, desc, ev.target.result); };
+                    reader.readAsDataURL(file);
+                }
+            },
+            saveResourceEntry(title, type, desc, url) { 
+                const id = Date.now().toString();
+                this.setDbDoc('smps_resources', id, { id, title, type, desc, url });
+                this.toggleModal('modal-add-resource'); 
+                document.getElementById('res-title').value = ''; document.getElementById('res-url').value = ''; document.getElementById('res-desc').value = ''; document.getElementById('res-file').value = ''; 
+                this.showToast('Resource added successfully'); 
+            },
+            deleteResource(id) { 
+                if(confirm('Delete this resource?')) { 
+                    this.delDbDoc('smps_resources', id);
+                    this.showToast('Resource deleted'); 
+                } 
+            },
+            processAttendance(id, status) { 
+                const record = this.data.attendance.find(a => String(a.id) === String(id)); 
+                if (record) { 
+                    this.setDbDoc('smps_attendance', record.id, { ...record, status }); 
+                    this.showToast(`Subject Attendance ${status}`, status === 'approved' ? 'success' : 'error'); 
+                } 
+            },
+
+            /* --- STUDENT LOGIC --- */
+            renderStudentDashboard() {
+                const s = this.data.currentUser;
+                document.getElementById('student-name-display').innerText = s.name;
+                document.getElementById('student-srn-display').innerText = `SRN: ${s.srn} | Dept: ${s.dept} | Sem: ${s.sem}`;
+
+                const today = new Date().toISOString().split('T')[0];
+                document.getElementById('daily-att-date').innerText = new Date().toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'short', day: 'numeric' });
+                
+                const myDailyRecord = this.data.dailyAttendance.find(a => a.srn === s.srn && a.date === today);
+                
+                const checkStatusUI = (status, typeLabel, onClickStr) => {
+                    if (status === 'approved' || status === true) return `<span class="badge badge-success px-3 py-2"><i class="fas fa-check-circle"></i> Approved</span>`;
+                    if (status === 'pending') return `<span class="badge badge-warning px-3 py-2"><i class="fas fa-clock"></i> Pending Approval</span>`;
+                    return `<button onclick="${onClickStr}" class="btn btn-sm btn-outline w-full justify-center">Mark ${typeLabel}</button>`;
+                };
+
+                document.getElementById('st-morning-status').innerHTML = checkStatusUI(myDailyRecord?.morning, 'Morning', "App.markDailyAttendance('morning')");
+                document.getElementById('st-evening-status').innerHTML = checkStatusUI(myDailyRecord?.evening, 'Evening', "App.markDailyAttendance('evening')");
+                
+                const isMorningApproved = myDailyRecord?.morning === 'approved' || myDailyRecord?.morning === true;
+                const isEveningApproved = myDailyRecord?.evening === 'approved' || myDailyRecord?.evening === true;
+                const finalStatus = (isMorningApproved && isEveningApproved) ? 'Present' : 'Absent';
+
+                const statusEl = document.getElementById('st-daily-final-status');
+                statusEl.innerText = finalStatus;
+                statusEl.className = finalStatus === 'Present' ? 'text-success font-bold text-2xl mt-1' : 'text-danger font-bold text-2xl mt-1';
+
+                const daysPresent = this.data.dailyAttendance.filter(a => a.srn === s.srn && (a.morning === 'approved' || a.morning === true) && (a.evening === 'approved' || a.evening === true)).length;
+                document.getElementById('student-overall-att').innerText = daysPresent;
+
+                this.renderAttendancePieChart(s.srn);
+
+                const grid = document.getElementById('student-subjects-grid');
+                grid.innerHTML = this.subjects.map(sub => {
+                    const myAtt = this.data.attendance.filter(a => a.srn === s.srn && a.subjectId === sub.id);
+                    const approved = myAtt.filter(a => a.status === 'approved').length;
+                    const pending = myAtt.filter(a => a.status === 'pending').length;
+                    const percentage = Math.round((approved / sub.total) * 100) || 0;
+                    return `
+                        <div class="stat-card">
+                            <div class="flex justify-between items-start mb-2">
+                                <h4 class="font-bold text-lg">${sub.name}</h4>
+                                <span class="badge ${percentage < 75 ? 'badge-danger' : 'badge-success'}">${percentage}%</span>
+                            </div>
+                            <p class="text-gray-500 text-sm mb-4">${sub.code} • Total Classes: ${sub.total}</p>
+                            <div class="flex justify-between text-sm mb-3">
+                                <span>Attended: <strong>${approved}</strong></span>
+                                <span>Pending: <strong class="text-warning">${pending}</strong></span>
+                            </div>
+                            <button onclick="App.markAttendance('${sub.id}')" class="btn btn-primary btn-sm w-full justify-center">
+                                Mark Subject Att.
+                            </button>
+                        </div>
+                    `;
+                }).join('');
+
+                const allMyAtt = this.data.attendance.filter(a => a.srn === s.srn);
+                document.getElementById('student-pending-count').innerText = allMyAtt.filter(a => a.status === 'pending').length;
+
+                this.renderStudentProjects();
+                this.renderStudentTimetable();
+                this.renderStudentResources();
+            },
+
+            renderAttendancePieChart(srn) {
+                let presentCount = 0;
+                let pendingCount = 0;
+                let absentCount = 0;
+
+                const myDaily = this.data.dailyAttendance.filter(a => a.srn === srn);
+                myDaily.forEach(record => {
+                    const isMornApp = record.morning === 'approved' || record.morning === true;
+                    const isEveApp = record.evening === 'approved' || record.evening === true;
+                    const isMornPend = record.morning === 'pending';
+                    const isEvePend = record.evening === 'pending';
+
+                    if (isMornApp && isEveApp) {
+                        presentCount++;
+                    } else if (isMornPend || isEvePend) {
+                        pendingCount++;
+                    } else {
+                        absentCount++;
+                    }
+                });
+
+                const ctx = document.getElementById('attendancePieChart');
+                if (!ctx) return;
+
+                if (this.chartInstance) {
+                    this.chartInstance.destroy();
+                }
+
+                const hasData = presentCount > 0 || pendingCount > 0 || absentCount > 0;
+                const chartData = hasData ? [presentCount, absentCount, pendingCount] : [0, 0, 0];
+                const bgColors = hasData ? ['#10B981', '#EF4444', '#F59E0B'] : ['#E5E7EB', '#E5E7EB', '#E5E7EB'];
+
+                this.chartInstance = new Chart(ctx, {
+                    type: 'pie',
+                    data: {
+                        labels: ['Present', 'Absent', 'Pending'],
+                        datasets: [{
+                            data: chartData,
+                            backgroundColor: bgColors,
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { position: 'right', labels: { boxWidth: 12, font: { size: 10 } } }
+                        }
+                    }
+                });
+            },
+
+            markDailyAttendance(type) {
+                const s = this.data.currentUser;
+                const today = new Date().toISOString().split('T')[0];
+                let record = this.data.dailyAttendance.find(a => a.srn === s.srn && a.date === today);
+                
+                let updatedRecord = record ? { ...record } : { id: Date.now().toString(), srn: s.srn, date: today, morning: false, evening: false };
+                updatedRecord[type] = 'pending';
+
+                this.setDbDoc('smps_dailyAttendance', updatedRecord.id, updatedRecord);
+                this.showToast(`${type.charAt(0).toUpperCase() + type.slice(1)} attendance sent for admin approval!`);
+            },
+
+            renderStudentProjects() {
+                const s = this.data.currentUser;
+                document.getElementById('st-proj1-name').innerText = s.p1 || "Not Assigned";
+                document.getElementById('st-proj2-name').innerText = s.p2 || "Not Assigned";
+
+                const myLogs = this.data.progressLogs.filter(l => l.srn === s.srn).reverse();
+                const container = document.getElementById('student-progress-timeline');
+                
+                if (myLogs.length === 0) {
+                    container.innerHTML = '<p class="text-center text-gray-500 py-4">No progress submitted yet.</p>';
+                    return;
+                }
+
+                container.innerHTML = myLogs.map(l => {
+                    const projName = l.projectId === '1' ? s.p1 : s.p2;
+                    const fileAttachment = l.fileData ? `<a href="${l.fileData}" download="${l.fileName}" class="log-file"><i class="fas fa-paperclip"></i> ${l.fileName}</a>` : '';
+                    const logStatus = !l.status ? 'pending' : l.status;
+                    const statusColor = logStatus === 'approved' ? 'success' : (logStatus === 'rejected' ? 'danger' : 'warning');
+
+                    return `
+                        <div class="log-item">
+                            <div class="log-date">
+                                <span>${new Date(l.date).toLocaleString()} • <span class="badge badge-primary">Project ${l.projectId}</span></span>
+                                <div class="flex gap-2 items-center">
+                                    <span class="badge badge-${statusColor}">${logStatus.toUpperCase()}</span>
+                                    <button onclick="App.deleteProgress('${l.id}')" class="btn btn-sm" style="color: var(--danger); background: none; padding: 0;" title="Delete this log"><i class="fas fa-trash"></i></button>
+                                </div>
+                            </div>
+                            <div class="font-bold text-sm mb-1 text-primary">${projName}</div>
+                            <div class="log-text">${l.text}</div>
+                            ${fileAttachment}
+                        </div>
+                    `;
+                }).join('');
+            },
+
+            submitProgress(e) {
+                e.preventDefault();
+                const s = this.data.currentUser;
+                const projId = document.getElementById('progress-project').value;
+                const text = document.getElementById('progress-text').value;
+                const fileInput = document.getElementById('progress-file');
+                const file = fileInput.files[0];
+
+                const processSubmission = (fileData = null, fileName = null) => {
+                    const id = Date.now().toString();
+                    this.setDbDoc('smps_progressLogs', id, {
+                        id, srn: s.srn, projectId: projId, text: text, date: new Date().toISOString(), status: 'pending', fileData: fileData, fileName: fileName
+                    });
+                    
+                    document.getElementById('progress-text').value = '';
+                    fileInput.value = '';
+                    this.showToast('Progress submitted successfully!');
+                };
+
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = (ev) => { processSubmission(ev.target.result, file.name); };
+                    reader.readAsDataURL(file);
+                } else {
+                    processSubmission();
+                }
+            },
+
+            deleteProgress(id) {
+                if(confirm('Are you sure you want to delete this progress log?')) {
+                    this.delDbDoc('smps_progressLogs', id);
+                    this.showToast('Progress log deleted');
+                }
+            },
+
+            renderStudentTimetable() {
+                const tbody = document.getElementById('student-timetable-body');
+                const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
+                
+                tbody.innerHTML = this.timeSlots.map(time => {
+                    let rowHtml = `<tr><td class="font-bold">${time}</td>`;
+                    days.forEach(day => {
+                        const entry = this.data.timetable.find(t => t.day === day && t.time === time);
+                        rowHtml += `<td>${entry ? entry.subject : '-'}</td>`;
+                    });
+                    rowHtml += '</tr>';
+                    return rowHtml;
+                }).join('');
+            },
+
+            renderStudentResources() {
+                const container = document.getElementById('student-resources-grid');
+                if(this.data.resources.length === 0) {
+                    container.innerHTML = '<p class="text-center text-gray-500 col-span-3">No resources available yet.</p>';
+                    return;
+                }
+
+                container.innerHTML = this.data.resources.map(res => {
+                    let iconClass = 'fa-file'; let colorClass = 'blue'; let btnText = 'View Link'; let downloadAttr = '';
+                    
+                    if(res.type === 'video') { iconClass = 'fa-video'; colorClass = 'green'; }
+                    else if(res.type === 'book') { iconClass = 'fa-book'; colorClass = 'purple'; }
+                    else if(res.type === 'pdf') { iconClass = 'fa-file-pdf'; colorClass = 'red'; }
+                    else if(res.type === 'img') { iconClass = 'fa-image'; colorClass = 'yellow'; }
+
+                    if (res.url.startsWith('data:')) { btnText = 'Download File'; downloadAttr = `download="${res.title}"`; }
+
+                    return `
+                        <div class="stat-card">
+                            <div class="flex items-center gap-3 mb-3">
+                                <div class="p-3 bg-${colorClass}-100 text-${colorClass}-600 rounded-lg">
+                                    <i class="fas ${iconClass} fa-lg" style="color: var(--${colorClass === 'red' ? 'danger' : (colorClass === 'green' ? 'secondary' : 'primary')})"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold">${res.title}</h4>
+                                    <p class="text-xs text-gray-500">${res.desc}</p>
+                                </div>
+                            </div>
+                            <a href="${res.url}" ${downloadAttr} target="_blank" class="btn btn-sm btn-outline w-full justify-center" style="text-decoration:none;">${btnText}</a>
+                        </div>
+                    `;
+                }).join('');
+            },
+
+            switchStudentTab(tabName) {
+                this.closeSidebar();
+                ['dashboard', 'projects', 'timetable', 'resources'].forEach(t => {
+                    document.getElementById(`student-tab-${t}`).classList.add('hidden');
+                    document.getElementById(`nav-student-${t}`).classList.remove('active');
+                });
+                document.getElementById(`student-tab-${tabName}`).classList.remove('hidden');
+                document.getElementById(`nav-student-${tabName}`).classList.add('active');
+            },
+
+            markAttendance(subjectId) {
+                const s = this.data.currentUser;
+                const today = new Date().toISOString().split('T')[0];
+                const existing = this.data.attendance.find(a => a.srn === s.srn && a.subjectId === subjectId && a.date === today);
+
+                if (existing) {
+                    this.showToast('Already marked for today!', 'error');
+                    return;
+                }
+
+                const id = Date.now().toString();
+                this.setDbDoc('smps_attendance', id, { id, srn: s.srn, subjectId: subjectId, date: today, status: 'pending' });
+                this.showToast('Subject Att. Marked! Waiting for Admin Approval.', 'success');
+            },
+
+            toggleModal(id) { document.getElementById(id).classList.toggle('hidden'); },
+
+            showToast(msg, type = 'success') {
+                const toast = document.getElementById('toast');
+                toast.innerText = msg;
+                toast.className = `toast ${type} show`;
+                setTimeout(() => { toast.classList.remove('show'); }, 3000);
+            }
+        };
+
+        window.App = App;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            App.init();
+        });
+    </script>
+</body>
+</html>

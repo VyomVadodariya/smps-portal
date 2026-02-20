@@ -45,6 +45,7 @@
         .text-center { text-align: center; }
         .w-full { width: 100%; }
         .mb-2 { margin-bottom: 0.5rem; }
+        .mb-3 { margin-bottom: 0.75rem; }
         .mb-4 { margin-bottom: 1rem; }
         .mt-4 { margin-top: 1rem; }
         .p-4 { padding: 1rem; }
@@ -192,6 +193,7 @@
         .badge-warning { background: #FEF3C7; color: #92400E; }
         .badge-danger { background: #FEE2E2; color: #991B1B; }
         .badge-primary { background: #e0e7ff; color: var(--primary-dark); }
+        .badge-dark { background: #374151; color: #ffffff; }
 
         /* Modals */
         .modal-overlay {
@@ -201,6 +203,7 @@
         .modal-content {
             background: white; padding: 1.5rem; border-radius: 0.5rem; width: 100%; max-width: 32rem; max-height: 90vh; overflow-y: auto;
         }
+        .modal-content-lg { max-width: 48rem; }
 
         /* Timeline / Logs */
         .log-item {
@@ -281,9 +284,9 @@
 </head>
 <body>
 
-    <!-- Firebase Connection Error Display Box -->
+    <!-- Local File Warning -->
     <div id="local-warning">
-        ⚠️ Firebase Connection Warning
+        ⚠️ WARNING: You are opening this file locally (file://). Firebase blocks local connections for security. Please use the GitHub Pages live link!
     </div>
 
     <!-- Notification Toast -->
@@ -303,7 +306,7 @@
             <div class="hero-content w-full">
                 <h1>Manage Your <br><span>Academic & Project Journey</span></h1>
                 <p class="mb-4" style="font-size: 1.1rem; color: #666; max-width: 600px;">
-                    A unified platform for students and administrators. Track 2-time daily attendance, manage subjects, submit daily project progress for approval, and streamline the academic lifecycle.
+                    A unified platform for students and administrators. Track 2-time daily attendance, manage subjects, submit daily project progress for approval, and seamlessly track R&D Teams.
                 </p>
                 <div class="flex gap-4" style="flex-wrap: wrap;">
                     <button onclick="App.showAuth('student')" class="btn btn-primary">Get Started</button>
@@ -363,7 +366,8 @@
             <nav>
                 <a onclick="App.switchAdminTab('overview')" id="nav-admin-overview" class="nav-item active"><i class="fas fa-chart-pie"></i> Overview</a>
                 <a onclick="App.switchAdminTab('students')" id="nav-admin-students" class="nav-item"><i class="fas fa-users"></i> Manage Students</a>
-                <a onclick="App.switchAdminTab('projects')" id="nav-admin-projects" class="nav-item"><i class="fas fa-tasks"></i> Student Projects</a>
+                <a onclick="App.switchAdminTab('teams')" id="nav-admin-teams" class="nav-item"><i class="fas fa-users-cog"></i> Team Tracking</a>
+                <a onclick="App.switchAdminTab('projects')" id="nav-admin-projects" class="nav-item"><i class="fas fa-tasks"></i> Individual Logs</a>
                 <a onclick="App.switchAdminTab('timetable')" id="nav-admin-timetable" class="nav-item"><i class="fas fa-calendar-alt"></i> Manage Timetable</a>
                 <a onclick="App.switchAdminTab('resources')" id="nav-admin-resources" class="nav-item"><i class="fas fa-folder-open"></i> Manage Resources</a>
                 <a onclick="App.switchAdminTab('approvals')" id="nav-admin-approvals" class="nav-item">
@@ -440,10 +444,20 @@
                 </div>
             </div>
 
-            <!-- Admin: Projects Tab -->
+            <!-- Admin: Teams/Projects Tracking Tab -->
+            <div id="admin-tab-teams" class="hidden">
+                <div class="mb-4">
+                    <p class="text-gray-500">Overview of all active R&D Projects. Click a project card to view its entire team and a combined timeline of all work submitted by those members.</p>
+                </div>
+                <div id="admin-team-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <!-- Populated by JS dynamically -->
+                </div>
+            </div>
+
+            <!-- Admin: Individual Projects Tab -->
             <div id="admin-tab-projects" class="hidden">
                 <div class="table-container p-4">
-                    <h3 class="mb-4">Student Project Tracking & Approvals</h3>
+                    <h3 class="mb-4">Individual Student Logs</h3>
                     <div style="overflow-x: auto;">
                         <table>
                             <thead>
@@ -517,7 +531,6 @@
 
             <!-- Admin: Approvals Tab -->
             <div id="admin-tab-approvals" class="hidden">
-                
                 <div class="table-container p-4">
                     <h3 class="mb-4">Today's Campus Daily Attendance</h3>
                     <p class="text-sm text-gray-500 mb-4">Approve both Morning and Evening requests to mark a student 'Present'. You can also manually edit a student's status.</p>
@@ -647,12 +660,16 @@
                     <!-- Project Details & Form -->
                     <div>
                         <div class="stat-card mb-4" style="border-left-color: var(--secondary);">
-                            <h3 class="text-primary font-bold"><i class="fas fa-tasks"></i> Assigned Projects</h3>
-                            <div class="mt-4">
+                            <h3 class="text-primary font-bold mb-4"><i class="fas fa-tasks"></i> My Assigned Projects</h3>
+                            <div class="mb-4">
                                 <p class="text-sm text-gray-500">Project 1:</p>
-                                <p class="font-bold mb-2" id="st-proj1-name">Loading...</p>
+                                <p class="font-bold mb-1" id="st-proj1-name">Loading...</p>
+                                <p class="text-xs text-primary"><i class="fas fa-users"></i> Teammates: <span id="st-proj1-teammates" class="text-gray-500">-</span></p>
+                            </div>
+                            <div>
                                 <p class="text-sm text-gray-500">Project 2:</p>
-                                <p class="font-bold" id="st-proj2-name">Loading...</p>
+                                <p class="font-bold mb-1" id="st-proj2-name">Loading...</p>
+                                <p class="text-xs text-primary"><i class="fas fa-users"></i> Teammates: <span id="st-proj2-teammates" class="text-gray-500">-</span></p>
                             </div>
                         </div>
 
@@ -673,6 +690,7 @@
                                 <div class="form-group mb-4">
                                     <label>Attach File (Optional)</label>
                                     <input type="file" id="progress-file" class="form-control" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png">
+                                    <small class="text-gray-500">Note: Keep files small for demo purposes.</small>
                                 </div>
                                 <button type="submit" class="btn btn-primary w-full justify-center"><i class="fas fa-paper-plane"></i> Submit Progress</button>
                             </form>
@@ -722,7 +740,7 @@
         </main>
     </div>
 
-    <!-- MODAL: View Progress (Admin) -->
+    <!-- MODAL: View Individual Progress (Admin) -->
     <div id="modal-view-progress" class="hidden modal-overlay">
         <div class="modal-content">
             <div class="flex justify-between items-center mb-4">
@@ -737,6 +755,31 @@
 
             <div id="admin-progress-timeline">
                 <!-- Populated by JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: View Full Team/Project Tracking (Admin) -->
+    <div id="modal-view-team" class="hidden modal-overlay">
+        <div class="modal-content modal-content-lg">
+            <div class="flex justify-between items-start mb-4">
+                <div>
+                    <h3 id="vt-project-name" class="text-xl text-primary font-bold">Project Name</h3>
+                    <p class="text-sm text-gray-500">Master Overview & Combined Submissions</p>
+                </div>
+                <button onclick="App.closeViewTeamModal()" class="btn btn-sm btn-outline"><i class="fas fa-times"></i></button>
+            </div>
+            
+            <div class="mb-4 p-4 bg-light rounded">
+                <h4 class="mb-2 font-bold"><i class="fas fa-users"></i> Active Team Members:</h4>
+                <div id="vt-team-members" class="flex flex-wrap gap-2">
+                    <!-- Badges injected here -->
+                </div>
+            </div>
+
+            <h4 class="mb-3 font-bold"><i class="fas fa-history"></i> Combined Team Timeline</h4>
+            <div id="vt-project-timeline" style="max-height: 400px; overflow-y: auto; padding-right: 10px;">
+                <!-- Logs injected here -->
             </div>
         </div>
     </div>
@@ -927,17 +970,17 @@
         import { getFirestore, collection, onSnapshot, doc, setDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         // =========================================================================
-        // YOUR FIREBASE CONFIG KEYS 
+        // YOUR LIVE FIREBASE KEYS 
         // =========================================================================
         const firebaseConfig = {
-  apiKey: "AIzaSyDzb6k7kPIgZKrC_X_Y5e_9FLDLNcvo1dU",
-  authDomain: "smps-portal.firebaseapp.com",
-  projectId: "smps-portal",
-  storageBucket: "smps-portal.firebasestorage.app",
-  messagingSenderId: "113098150786",
-  appId: "1:113098150786:web:f502701777b37c440f759b",
-  measurementId: "G-98PEL2D3PR"
-};
+            apiKey: "AIzaSyDzb6k7kPIgZKrC_X_Y5e_9FLDLNcvo1dU",
+            authDomain: "smps-portal.firebaseapp.com",
+            projectId: "smps-portal",
+            storageBucket: "smps-portal.firebasestorage.app",
+            messagingSenderId: "113098150786",
+            appId: "1:113098150786:web:f502701777b37c440f759b",
+            measurementId: "G-98PEL2D3PR"
+        };
         // =========================================================================
 
         let app = initializeApp(firebaseConfig);
@@ -964,6 +1007,7 @@
             
             chartInstance: null,
             currentViewedSrn: null,
+            currentViewedTeam: null,
 
             subjects: [
                 { id: 'sub1', name: 'Data Structures', code: 'CS301', total: 40 },
@@ -984,9 +1028,8 @@
                     await signInAnonymously(auth);
                 } catch(e) {
                     console.error("Firebase Auth Error", e);
-                    // If auth fails, show EXACTLY why on screen so user can fix it
                     const warnBox = document.getElementById('local-warning');
-                    warnBox.innerHTML = `⚠️ <b>FIREBASE CONNECTION FAILED:</b> ${e.message}<br><br><b>Did you forget to add <code>vyomvadodariya.github.io</code> to the Authorized Domains list in Firebase -> Authentication -> Settings?</b>`;
+                    warnBox.innerHTML = `⚠️ <b>FIREBASE CONNECTION FAILED:</b> ${e.message}<br><br><b>Did you forget to add your domain to the Authorized Domains list in Firebase -> Authentication -> Settings?</b>`;
                     warnBox.style.display = 'block';
                 }
 
@@ -1056,8 +1099,13 @@
                         this.renderStudentDashboard();
                     } else {
                         this.renderAdminDashboard();
+                        
+                        // Auto update modals if they are open
                         if (this.currentViewedSrn && !document.getElementById('modal-view-progress').classList.contains('hidden')) {
                             this.viewStudentProgress(this.currentViewedSrn);
+                        }
+                        if (this.currentViewedTeam && !document.getElementById('modal-view-team').classList.contains('hidden')) {
+                            this.viewTeamDetails(this.currentViewedTeam);
                         }
                     }
                 }
@@ -1069,7 +1117,6 @@
                     this.showToast("Cannot connect to Database. Fix errors above first!", "error");
                     return;
                 }
-
                 if(!confirm("Are you sure you want to initialize the database with the 33 students?")) return;
 
                 const baseStudents = [
@@ -1110,14 +1157,12 @@
 
                 this.showToast('Pushing 33 students to live database. Please wait...', 'warning');
 
-                // Push each student to db
                 for (let i = 0; i < baseStudents.length; i++) {
                     const s = baseStudents[i];
                     const srn = `SRN${String(i + 1).padStart(3, '0')}`;
                     await this.setDbDoc('smps_students', srn, { ...s, srn, password: 'student123' });
                 }
 
-                // Seed some basic timetable/resources too
                 await this.setDbDoc('smps_timetable', '1', { id: '1', day: 'Monday', time: '09:00 - 10:00', subject: 'Data Structures' });
                 await this.setDbDoc('smps_timetable', '2', { id: '2', day: 'Tuesday', time: '10:00 - 11:00', subject: 'Web Development' });
                 await this.setDbDoc('smps_resources', '1', { id: '1', title: 'DS Lecture Notes', type: 'pdf', desc: 'Unit 1 & 2', url: '#' });
@@ -1202,7 +1247,6 @@
 
             /* --- ADMIN LOGIC --- */
             renderAdminDashboard() {
-                // Show Warning Box if no students exist
                 if(this.data.students.length === 0) {
                     document.getElementById('empty-db-warning').classList.remove('hidden');
                 } else {
@@ -1234,6 +1278,7 @@
                     </tr>
                 `).join('') || '<tr><td colspan="5" class="text-center">No students found</td></tr>';
 
+                this.renderAdminTeams();
                 this.renderAdminProjects();
 
                 const ttBody = document.getElementById('admin-timetable-body');
@@ -1260,6 +1305,121 @@
                 this.renderApprovalsTable();
             },
 
+            // --- ADMIN: TEAM TRACKING ---
+            renderAdminTeams() {
+                const projectsMap = {};
+                
+                // Group students by project names
+                this.data.students.forEach(s => {
+                    [s.p1, s.p2].forEach(pName => {
+                        if(pName && pName !== '-' && pName.trim() !== '') {
+                            const pKey = pName.trim();
+                            if(!projectsMap[pKey]) projectsMap[pKey] = { name: pKey, members: [], logCount: 0, pendingCount: 0 };
+                            
+                            // Add student to members if not already in it
+                            if(!projectsMap[pKey].members.find(m => m.srn === s.srn)) {
+                                projectsMap[pKey].members.push(s);
+                            }
+                        }
+                    });
+                });
+
+                // Count logs for each project group
+                this.data.progressLogs.forEach(l => {
+                    const s = this.data.students.find(x => x.srn === l.srn);
+                    if(s) {
+                        const pName = l.projectId === '1' ? s.p1 : s.p2;
+                        if(pName) {
+                            const pKey = pName.trim();
+                            if(projectsMap[pKey]) {
+                                projectsMap[pKey].logCount++;
+                                if(!l.status || l.status === 'pending') projectsMap[pKey].pendingCount++;
+                            }
+                        }
+                    }
+                });
+
+                const allProjects = Object.values(projectsMap).sort((a,b) => b.logCount - a.logCount);
+                const container = document.getElementById('admin-team-grid');
+                
+                if (allProjects.length === 0) {
+                    container.innerHTML = '<p class="text-gray-500">No projects found. Assign projects to students first.</p>';
+                    return;
+                }
+
+                container.innerHTML = allProjects.map(p => {
+                    // Safe string escaping for HTML onclick
+                    const safeName = p.name.replace(/'/g, "\\'");
+                    return `
+                        <div class="stat-card" style="cursor: pointer; transition: 0.2s;" onclick="App.viewTeamDetails('${safeName}')" onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform='translateY(0)'">
+                            <h4 class="font-bold text-lg mb-2 text-primary" style="min-height: 56px;">${p.name}</h4>
+                            <div class="flex justify-between text-sm text-gray-500 mb-2 border-t pt-2">
+                                <span><i class="fas fa-users"></i> ${p.members.length} Members</span>
+                                <span><i class="fas fa-file-alt"></i> ${p.logCount} Logs</span>
+                            </div>
+                            <div class="mt-2">
+                                <span class="badge ${p.pendingCount > 0 ? 'badge-warning' : 'badge-success'}">${p.pendingCount} Pending Approvals</span>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            },
+
+            viewTeamDetails(projName) {
+                this.currentViewedTeam = projName;
+                document.getElementById('vt-project-name').innerText = projName;
+                
+                // Get Members
+                const members = this.data.students.filter(x => (x.p1 && x.p1.trim() === projName) || (x.p2 && x.p2.trim() === projName));
+                document.getElementById('vt-team-members').innerHTML = members.map(m => `<span class="badge badge-dark">${m.name} (${m.srn})</span>`).join('');
+
+                // Get Logs
+                const teamLogs = this.data.progressLogs.filter(l => {
+                    const stu = this.data.students.find(s => s.srn === l.srn);
+                    if(!stu) return false;
+                    const logP = l.projectId === '1' ? stu.p1 : stu.p2;
+                    return logP && logP.trim() === projName;
+                }).sort((a,b) => new Date(b.date) - new Date(a.date));
+
+                const container = document.getElementById('vt-project-timeline');
+                if (teamLogs.length === 0) {
+                    container.innerHTML = '<p class="text-center text-gray-500 py-4">No team progress logs submitted yet.</p>';
+                } else {
+                    container.innerHTML = teamLogs.map(l => {
+                        const stu = this.data.students.find(s => s.srn === l.srn);
+                        const fileAttachment = l.fileData ? `<a href="${l.fileData}" download="${l.fileName}" class="log-file"><i class="fas fa-paperclip"></i> ${l.fileName}</a>` : '';
+                        
+                        const isPending = !l.status || l.status === 'pending';
+                        const adminActions = isPending ? `
+                            <div class="mt-2 flex gap-2">
+                                <button onclick="App.processProgressLog('${l.id}', 'approved', null, '${projName.replace(/'/g, "\\'")}')" class="btn btn-sm btn-success"><i class="fas fa-check"></i> Approve</button>
+                                <button onclick="App.processProgressLog('${l.id}', 'rejected', null, '${projName.replace(/'/g, "\\'")}')" class="btn btn-sm btn-danger"><i class="fas fa-times"></i> Reject</button>
+                            </div>
+                        ` : `<div class="mt-2"><span class="badge badge-${l.status === 'approved' ? 'success' : 'danger'}"><i class="fas fa-${l.status === 'approved' ? 'check' : 'times'}"></i> ${l.status.toUpperCase()}</span></div>`;
+
+                        return `
+                            <div class="log-item">
+                                <div class="log-date">
+                                    <span>${new Date(l.date).toLocaleString()}</span>
+                                    <span class="font-bold text-primary"><i class="fas fa-user"></i> ${stu ? stu.name : l.srn}</span>
+                                </div>
+                                <div class="log-text">${l.text}</div>
+                                ${fileAttachment}
+                                ${adminActions}
+                            </div>
+                        `;
+                    }).join('');
+                }
+
+                document.getElementById('modal-view-team').classList.remove('hidden');
+            },
+
+            closeViewTeamModal() {
+                this.currentViewedTeam = null;
+                document.getElementById('modal-view-team').classList.add('hidden');
+            },
+
+            // --- ADMIN: INDIVIDUAL PROJECT LOGS ---
             renderAdminProjects() {
                 const tbody = document.getElementById('admin-projects-body');
                 tbody.innerHTML = this.data.students.map(s => {
@@ -1338,7 +1498,7 @@
                 document.getElementById('modal-view-progress').classList.add('hidden');
             },
 
-            processProgressLog(logId, newStatus, srn) {
+            processProgressLog(logId, newStatus, srnContext = null, teamContext = null) {
                 const log = this.data.progressLogs.find(l => String(l.id) === String(logId));
                 if (log) {
                     this.setDbDoc('smps_progressLogs', log.id, { ...log, status: newStatus });
@@ -1434,7 +1594,7 @@
 
             switchAdminTab(tabName) {
                 this.closeSidebar();
-                ['overview', 'students', 'projects', 'timetable', 'resources', 'approvals'].forEach(t => {
+                ['overview', 'students', 'teams', 'projects', 'timetable', 'resources', 'approvals'].forEach(t => {
                     document.getElementById(`admin-tab-${t}`).classList.add('hidden');
                     document.getElementById(`nav-admin-${t}`).classList.remove('active');
                 });
@@ -1444,7 +1604,8 @@
                 const titles = { 
                     overview: 'Dashboard Overview', 
                     students: 'Student Directory', 
-                    projects: 'Student Project Tracking & Approvals',
+                    teams: 'Project Teams Tracking',
+                    projects: 'Individual Student Logs',
                     timetable: 'Manage Timetable',
                     resources: 'Manage Resources',
                     approvals: 'Daily Attendance & Approvals' 
@@ -1695,10 +1856,23 @@
                 this.showToast(`${type.charAt(0).toUpperCase() + type.slice(1)} attendance sent for admin approval!`);
             },
 
+            getTeammates(projName, mySrn) {
+                if (!projName || projName === '-' || projName.trim() === '') return 'None';
+                const p = projName.trim();
+                const mates = this.data.students.filter(x => 
+                    ((x.p1 && x.p1.trim() === p) || (x.p2 && x.p2.trim() === p)) && x.srn !== mySrn
+                );
+                return mates.length > 0 ? mates.map(m => m.name).join(', ') : 'None';
+            },
+
             renderStudentProjects() {
                 const s = this.data.currentUser;
                 document.getElementById('st-proj1-name').innerText = s.p1 || "Not Assigned";
                 document.getElementById('st-proj2-name').innerText = s.p2 || "Not Assigned";
+
+                // Map Teammates
+                document.getElementById('st-proj1-teammates').innerText = this.getTeammates(s.p1, s.srn);
+                document.getElementById('st-proj2-teammates').innerText = this.getTeammates(s.p2, s.srn);
 
                 const myLogs = this.data.progressLogs.filter(l => l.srn === s.srn).sort((a,b) => new Date(b.date) - new Date(a.date));
                 const container = document.getElementById('student-progress-timeline');
@@ -1858,4 +2032,3 @@
     </script>
 </body>
 </html>
-

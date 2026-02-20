@@ -58,6 +58,11 @@
         .text-primary { color: var(--primary); }
         .truncate { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
+        /* Hover States for Contact Links */
+        .hover\:text-danger:hover { color: var(--danger) !important; }
+        .hover\:text-success:hover { color: var(--secondary) !important; }
+        .hover\:text-primary:hover { color: var(--primary) !important; }
+
         /* Buttons */
         .btn {
             padding: 0.75rem 1.5rem;
@@ -1470,8 +1475,11 @@
                 const tbody = document.getElementById('student-list-body');
                 tbody.innerHTML = this.data.students.map(s => {
                     let contactHtml = '';
-                    if (s.email && s.email.trim() !== '') contactHtml += `<div class="text-xs text-gray-500 mb-1"><i class="fas fa-envelope"></i> ${s.email}</div>`;
-                    if (s.phone && s.phone.trim() !== '') contactHtml += `<div class="text-xs text-gray-500 mb-1"><i class="fas fa-phone"></i> ${s.phone}</div>`;
+                    if (s.email && s.email.trim() !== '') contactHtml += `<div class="text-xs text-gray-500 mb-1"><a href="https://mail.google.com/mail/?view=cm&fs=1&to=${s.email}" target="_blank" class="text-gray-500 hover:text-danger" style="text-decoration:none; transition: color 0.2s;"><i class="fas fa-envelope"></i> ${s.email}</a></div>`;
+                    if (s.phone && s.phone.trim() !== '') {
+                        const cleanPhone = s.phone.replace(/\D/g, '').slice(-10);
+                        contactHtml += `<div class="text-xs text-gray-500 mb-1"><a href="https://wa.me/91${cleanPhone}" target="_blank" class="text-gray-500 hover:text-success" style="text-decoration:none; transition: color 0.2s;"><i class="fab fa-whatsapp"></i> ${s.phone}</a></div>`;
+                    }
                     if (s.address && s.address.trim() !== '') contactHtml += `<div class="text-xs text-gray-400" style="max-width: 200px; white-space: normal; overflow-wrap: break-word;"><i class="fas fa-map-marker-alt"></i> ${s.address}</div>`;
                     
                     const finalContactDisplay = contactHtml.trim() !== '' ? contactHtml : '<span class="text-xs text-gray-400">No contact info</span>';
@@ -1586,8 +1594,11 @@
                 // Display User Cards with Full Details instead of basic badges
                 document.getElementById('vt-team-members').innerHTML = members.map(m => {
                     let contactHtml = '';
-                    if (m.email) contactHtml += `<div class="text-xs text-gray-500 truncate" title="${m.email}"><i class="fas fa-envelope"></i> ${m.email}</div>`;
-                    if (m.phone) contactHtml += `<div class="text-xs text-gray-500 truncate" title="${m.phone}"><i class="fas fa-phone"></i> ${m.phone}</div>`;
+                    if (m.email) contactHtml += `<div class="text-xs text-gray-500 truncate mb-1" title="${m.email}"><a href="https://mail.google.com/mail/?view=cm&fs=1&to=${m.email}" target="_blank" class="text-gray-500 hover:text-danger" style="text-decoration:none; transition: color 0.2s;"><i class="fas fa-envelope"></i> ${m.email}</a></div>`;
+                    if (m.phone) {
+                        const cleanPhone = m.phone.replace(/\D/g, '').slice(-10);
+                        contactHtml += `<div class="text-xs text-gray-500 truncate mb-1" title="${m.phone}"><a href="https://wa.me/91${cleanPhone}" target="_blank" class="text-gray-500 hover:text-success" style="text-decoration:none; transition: color 0.2s;"><i class="fab fa-whatsapp"></i> ${m.phone}</a></div>`;
+                    }
                     if (m.address) contactHtml += `<div class="text-xs text-gray-500 truncate" title="${m.address}"><i class="fas fa-map-marker-alt"></i> ${m.address}</div>`;
                     
                     return `
@@ -2213,16 +2224,20 @@
                 
                 if (mates.length === 0) return '<span class="text-sm text-gray-500 italic">No teammates found for this project.</span>';
                 
-                return mates.map(m => `
-                    <div class="bg-white border border-gray-200 p-2 rounded shadow-sm text-sm">
-                        <div class="font-bold text-dark">${m.name} <span class="text-xs font-normal text-gray-500 ml-1">(${m.dept})</span></div>
-                        <div class="flex gap-3 mt-1">
-                            ${m.phone ? `<a href="tel:${m.phone}" class="text-primary text-xs" style="text-decoration:none;"><i class="fas fa-phone"></i> ${m.phone}</a>` : ''}
-                            ${m.email ? `<a href="mailto:${m.email}" class="text-primary text-xs" style="text-decoration:none;"><i class="fas fa-envelope"></i> Email</a>` : ''}
-                            ${!m.phone && !m.email ? `<span class="text-xs text-gray-400">No contact info</span>` : ''}
+                return mates.map(m => {
+                    // Strip non-digits and grab last 10 digits to format robust Indian WhatsApp link
+                    const cleanPhone = m.phone ? m.phone.replace(/\\D/g, '').slice(-10) : '';
+                    return `
+                        <div class="bg-white border border-gray-200 p-2 rounded shadow-sm text-sm">
+                            <div class="font-bold text-dark">${m.name} <span class="text-xs font-normal text-gray-500 ml-1">(${m.dept})</span></div>
+                            <div class="flex gap-3 mt-1">
+                                ${m.phone ? `<a href="https://wa.me/91${cleanPhone}" target="_blank" class="text-success text-xs font-bold" style="text-decoration:none;"><i class="fab fa-whatsapp"></i> WhatsApp</a>` : ''}
+                                ${m.email ? `<a href="https://mail.google.com/mail/?view=cm&fs=1&to=${m.email}" target="_blank" class="text-danger text-xs font-bold" style="text-decoration:none;"><i class="fas fa-envelope"></i> Gmail</a>` : ''}
+                                ${!m.phone && !m.email ? `<span class="text-xs text-gray-400">No contact info</span>` : ''}
+                            </div>
                         </div>
-                    </div>
-                `).join('');
+                    `;
+                }).join('');
             },
 
             renderStudentProjects() {

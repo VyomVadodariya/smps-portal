@@ -95,6 +95,39 @@
         }
         .nav-logo { font-size: 1.5rem; font-weight: 700; color: var(--primary); }
         
+        /* Scrolling Marquee Banner */
+        .marquee-container {
+            width: 100%;
+            background-color: var(--dark);
+            color: var(--white);
+            overflow: hidden;
+            padding: 0.5rem 0;
+            position: relative;
+            z-index: 40;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
+        }
+        .marquee-content {
+            display: flex;
+            width: max-content;
+            animation: marquee 35s linear infinite;
+        }
+        .marquee-content:hover {
+            animation-play-state: paused;
+            cursor: default;
+        }
+        .marquee-item {
+            padding: 0 3rem;
+            font-size: 0.95rem;
+            font-weight: 400;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        @keyframes marquee {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+        }
+        
         /* Hero Section */
         .hero {
             padding: 4rem 5%;
@@ -328,6 +361,14 @@
                 <button onclick="App.showAuth('admin')" class="btn btn-outline btn-sm">Admin</button>
             </div>
         </nav>
+        
+        <!-- Live Announcements Marquee -->
+        <div class="marquee-container">
+            <div class="marquee-content" id="landing-marquee">
+                <!-- Dynamically populated by JS based on live announcements -->
+                <span class="marquee-item"><i class="fas fa-star text-warning"></i> Loading live updates...</span>
+            </div>
+        </div>
 
         <section class="hero container">
             <div class="hero-content w-full">
@@ -1297,6 +1338,8 @@
             },
 
             refreshUI() {
+                this.updateLandingMarquee(); // Make sure landing page always has updated data
+                
                 if (this.data.currentUser) {
                     if (this.data.currentUser.role === 'student') {
                         const updatedUser = this.data.students.find(s => s.srn === this.data.currentUser.srn);
@@ -1314,6 +1357,36 @@
                         }
                     }
                 }
+            },
+            
+            // --- LANDING PAGE LOGIC ---
+            updateLandingMarquee() {
+                const marquee = document.getElementById('landing-marquee');
+                if(!marquee) return;
+                
+                let itemsHTML = '';
+                // If there are real announcements from Admin, display them!
+                if(this.data.announcements && this.data.announcements.length > 0) {
+                    const liveAnnouncements = this.data.announcements.map(a => {
+                        let icon = 'fa-bullhorn text-primary';
+                        if(a.type === 'danger') icon = 'fa-exclamation-triangle text-danger';
+                        if(a.type === 'warning') icon = 'fa-exclamation-circle text-warning';
+                        if(a.type === 'success') icon = 'fa-check-circle text-success';
+                        return `<span class="marquee-item"><i class="fas ${icon}"></i> <strong>${a.title}</strong>: ${a.text}</span>`;
+                    }).join('');
+                    // Duplicate exactly once to create a seamless infinite scrolling loop
+                    itemsHTML = liveAnnouncements + liveAnnouncements;
+                } else {
+                    // Default Fallback placeholders if DB is empty
+                    const defaultItems = `
+                        <span class="marquee-item"><i class="fas fa-star text-warning"></i> Welcome to the SMPS Tech Portal - 2026 Batch is Live!</span>
+                        <span class="marquee-item"><i class="fas fa-bullhorn text-primary"></i> Reminder: Morning shift attendance closes at 10:00 AM daily.</span>
+                        <span class="marquee-item"><i class="fas fa-file-alt text-success"></i> Project Phase 1 Documentation due this Friday.</span>
+                        <span class="marquee-item"><i class="fas fa-users text-info"></i> Team Leaders: Please update your Kanban boards daily.</span>
+                    `;
+                    itemsHTML = defaultItems + defaultItems;
+                }
+                marquee.innerHTML = itemsHTML;
             },
 
             // --- SEED DATABASE ---

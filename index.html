@@ -56,6 +56,7 @@
         .text-danger { color: var(--danger); }
         .text-warning { color: var(--warning); }
         .text-primary { color: var(--primary); }
+        .truncate { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
         /* Buttons */
         .btn {
@@ -794,7 +795,7 @@
                 </div>
                 
                 <div id="vt-team-members" class="flex flex-wrap gap-2">
-                    <!-- Badges injected here -->
+                    <!-- User Cards Injected Here -->
                 </div>
 
                 <!-- Hidden Manage Team Section -->
@@ -838,13 +839,24 @@
                             <option value="CSE">CSE</option>
                             <option value="ECE">ECE</option>
                             <option value="ME">ME</option>
+                            <option value="EEE">EEE</option>
+                            <option value="AI/ML">AI/ML</option>
+                            <option value="ISE">ISE</option>
+                            <option value="CIVIL">CIVIL</option>
+                            <option value="IT">IT</option>
                         </select>
                     </div>
                     <div class="form-group">
                         <label>Semester</label>
                         <select id="new-sem" class="form-control">
-                            <option value="1">1</option><option value="3">3</option>
-                            <option value="5">5</option><option value="7">7</option>
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                            <option value="4">4</option>
+                            <option value="5">5</option>
+                            <option value="6">6</option>
+                            <option value="7">7</option>
+                            <option value="8">8</option>
                         </select>
                     </div>
                 </div>
@@ -900,13 +912,24 @@
                             <option value="CSE">CSE</option>
                             <option value="ECE">ECE</option>
                             <option value="ME">ME</option>
+                            <option value="EEE">EEE</option>
+                            <option value="AI/ML">AI/ML</option>
+                            <option value="ISE">ISE</option>
+                            <option value="CIVIL">CIVIL</option>
+                            <option value="IT">IT</option>
                         </select>
                     </div>
                     <div class="form-group">
                         <label>Semester</label>
                         <select id="edit-sem" class="form-control">
-                            <option value="1">1</option><option value="3">3</option>
-                            <option value="5">5</option><option value="7">7</option>
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                            <option value="4">4</option>
+                            <option value="5">5</option>
+                            <option value="6">6</option>
+                            <option value="7">7</option>
+                            <option value="8">8</option>
                         </select>
                     </div>
                 </div>
@@ -1448,7 +1471,22 @@
                 
                 // Get Members
                 const members = this.data.students.filter(x => (x.p1 && x.p1.trim() === projName) || (x.p2 && x.p2.trim() === projName));
-                document.getElementById('vt-team-members').innerHTML = members.map(m => `<span class="badge badge-dark">${m.name} (${m.srn})</span>`).join('') || '<span class="text-sm text-gray-500">No active members</span>';
+                
+                // Display User Cards with Full Details instead of basic badges
+                document.getElementById('vt-team-members').innerHTML = members.map(m => {
+                    let contactHtml = '';
+                    if (m.email) contactHtml += `<div class="text-xs text-gray-500 truncate" title="${m.email}"><i class="fas fa-envelope"></i> ${m.email}</div>`;
+                    if (m.phone) contactHtml += `<div class="text-xs text-gray-500 truncate" title="${m.phone}"><i class="fas fa-phone"></i> ${m.phone}</div>`;
+                    if (m.address) contactHtml += `<div class="text-xs text-gray-500 truncate" title="${m.address}"><i class="fas fa-map-marker-alt"></i> ${m.address}</div>`;
+                    
+                    return `
+                        <div class="p-3 bg-white border border-gray-200 rounded shadow-sm" style="flex: 1 1 200px; max-width: 100%;">
+                            <div class="font-bold text-sm text-primary mb-1">${m.name}</div>
+                            <div class="text-xs font-bold text-gray-600 mb-2">${m.srn} • ${m.dept} (Sem ${m.sem})</div>
+                            ${contactHtml || '<div class="text-xs text-gray-400">No contact info</div>'}
+                        </div>
+                    `;
+                }).join('') || '<span class="text-sm text-gray-500 w-full text-center">No active members in this project.</span>';
 
                 // Get Logs
                 const teamLogs = this.data.progressLogs.filter(l => {

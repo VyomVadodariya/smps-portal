@@ -433,6 +433,7 @@
                                     <th>Name</th>
                                     <th>Dept</th>
                                     <th>Sem</th>
+                                    <th>Contact Info</th>
                                     <th>Action</th>
                                 </tr>
                             </thead>
@@ -832,6 +833,20 @@
                         </select>
                     </div>
                 </div>
+                <div class="grid grid-cols-2 gap-2 mb-2">
+                    <div class="form-group">
+                        <label>Phone</label>
+                        <input type="text" id="new-phone" class="form-control" placeholder="Optional">
+                    </div>
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input type="email" id="new-email" class="form-control" placeholder="Optional">
+                    </div>
+                </div>
+                <div class="form-group mb-2">
+                    <label>Address</label>
+                    <textarea id="new-address" class="form-control" rows="2" placeholder="Optional"></textarea>
+                </div>
                 <div class="form-group mb-2">
                     <label>Project 1</label>
                     <input type="text" id="new-p1" class="form-control" placeholder="Project 1 Name" required>
@@ -879,6 +894,20 @@
                             <option value="5">5</option><option value="7">7</option>
                         </select>
                     </div>
+                </div>
+                <div class="grid grid-cols-2 gap-2 mb-2">
+                    <div class="form-group">
+                        <label>Phone</label>
+                        <input type="text" id="edit-phone" class="form-control" placeholder="Optional">
+                    </div>
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input type="email" id="edit-email" class="form-control" placeholder="Optional">
+                    </div>
+                </div>
+                <div class="form-group mb-2">
+                    <label>Address</label>
+                    <textarea id="edit-address" class="form-control" rows="2" placeholder="Optional"></textarea>
                 </div>
                 <div class="form-group mb-2">
                     <label>Project 1</label>
@@ -1143,39 +1172,39 @@
                 if(!confirm("Are you sure you want to initialize the database with the 33 students?")) return;
 
                 const baseStudents = [
-                    { name: 'Sanjana G M', p1: 'Drone Detection Antenna', p2: 'Development of Antenna', dept: 'ECE', sem: '5' },
-                    { name: 'Varshini A R', p1: 'Drone Detection Antenna', p2: 'Drone Jammer Design', dept: 'ECE', sem: '5' },
-                    { name: 'Karthik Shivaram', p1: 'Drone Detection Antenna', p2: 'Drone Jammer Design', dept: 'ECE', sem: '5' },
-                    { name: 'Pradeep M', p1: 'Drone Detection Antenna', p2: 'Drone Jammer Design', dept: 'ECE', sem: '5' },
-                    { name: 'Rohan S R', p1: 'EV Charging Staion Reverse Engineering', p2: 'EV Charging Staion - Reverse Engineering', dept: 'CSE', sem: '5' },
-                    { name: 'Spandana Venkatesh', p1: 'EV Charging Staion Reverse Engineering', p2: 'Forward Canbus Communication', dept: 'ECE', sem: '5' },
-                    { name: 'Spoorthi HS', p1: 'Group 3 R&D', p2: 'IOT-Smart LCD System + Drone Jammer', dept: 'ECE', sem: '5' },
-                    { name: 'Spoorthi V N', p1: 'Group 3 R&D', p2: 'IOT-Smart LCD System + Drone Jammer', dept: 'ECE', sem: '5' },
-                    { name: 'Vinendrakumar', p1: 'Group 3 R&D', p2: 'Solar Hybrid System', dept: 'ECE', sem: '5' },
-                    { name: 'Amith', p1: 'Group 4 R&D', p2: 'Forward Canbus Communication', dept: 'ECE', sem: '5' },
-                    { name: 'Siri G Raghuram', p1: 'Group 4 R&D', p2: 'Canbus Communication -Forward Engineering', dept: 'ECE', sem: '5' },
-                    { name: 'Chandana N', p1: 'Group 4 R&D', p2: 'Forward Canbus Communication', dept: 'ECE', sem: '5' },
-                    { name: 'Amulya', p1: 'Group 4 R&D', p2: 'Micro Electronic Project', dept: 'ECE', sem: '5' },
-                    { name: 'Sanvi', p1: 'Group 4 R&D', p2: 'Development of Antenna', dept: 'ECE', sem: '5' },
-                    { name: 'Pooja M B', p1: 'Group 4 R&D', p2: 'Development of Antenna', dept: 'ECE', sem: '5' },
-                    { name: 'Dhruvitha K G', p1: 'SMPS Supply 12V 30A', p2: 'IOT-Smart LCD Data Encryption', dept: 'CSE', sem: '5' },
-                    { name: 'Ayush Babesh', p1: 'SMPS Supply 12V 30A', p2: 'IOT-Smart LCD System', dept: 'ECE', sem: '5' },
-                    { name: 'Chethan P', p1: 'SMPS Supply 12V 30A', p2: 'IOT-Smart LCD System', dept: 'ECE', sem: '5' },
-                    { name: 'Dhanush H', p1: 'SMPS Supply 12V 30A', p2: 'EV Charging Staion - Reverse Engineering', dept: 'ECE', sem: '5' },
-                    { name: 'Prajwal M P', p1: 'SMPS Supply 48V 50A', p2: 'Rectifier Charger Circuit', dept: 'ECE', sem: '5' },
-                    { name: 'Abhijeet Aste', p1: 'SMPS Supply 48V 50A', p2: 'Rectifier Charger', dept: 'ECE', sem: '5' },
-                    { name: 'Dileep Kuber Naik', p1: 'SMPS Supply 48V 50A', p2: 'Rectifier Charger', dept: 'ECE', sem: '5' },
-                    { name: 'Bharath G N', p1: 'SMPS Supply 48V 50A', p2: 'Industry Entry Level Project', dept: 'ECE', sem: '5' },
-                    { name: 'Kavyashree K', p1: 'SMPS Supply 24V 30A', p2: 'Reverse Engineering in some new product', dept: 'ECE', sem: '5' },
-                    { name: 'Akash HP', p1: 'SMPS Supply 24V 30A', p2: 'Drone Jammer Design', dept: 'ECE', sem: '5' },
-                    { name: 'Dhanush E', p1: 'SMPS Supply 24V 30A', p2: 'EV Charging Staion - Reverse Engineering', dept: 'ECE', sem: '5' },
-                    { name: 'Asif S Nadaf', p1: 'SMPS Supply 24V 30A', p2: 'Micro Electronic Project', dept: 'ECE', sem: '5' },
-                    { name: 'M Naveenkumar', p1: 'SMPS Supply 24V 30A', p2: 'CCNA Building Managemnent System', dept: 'EEE', sem: '5' },
-                    { name: 'Yashoda', p1: 'Industry Entry Level R&D', p2: 'Reverse Engineering in some new product', dept: 'ECE', sem: '5' },
-                    { name: 'Veekshitha k', p1: 'Industry Entry Level R&D', p2: 'Drone Jammer Design', dept: 'ECE', sem: '5' },
-                    { name: 'Veeresh', p1: 'Industry Entry Level R&D', p2: 'Drone Jammer Design', dept: 'ECE', sem: '5' },
-                    { name: 'Fairoz', p1: 'Industry Entry Level R&D', p2: 'Drone Jammer Design', dept: 'ECE', sem: '5' },
-                    { name: 'Sumith S Kamble', p1: 'Industry Entry Level R&D', p2: 'Rectifier Charger', dept: 'ECE', sem: '5' }
+                    { name: 'Sanjana G M', p1: 'Drone Detection Antenna', p2: 'Development of Antenna', dept: 'ECE', sem: '5', email: 'sarijanasanjanagm987@gmail.com', phone: '8660268131', address: 'SHIVAMOGGA KARNATAKA' },
+                    { name: 'Varshini A R', p1: 'Drone Detection Antenna', p2: 'Drone Jammer Design', dept: 'ECE', sem: '5', email: 'varshiniar18@gmail.com', phone: '9731617036', address: '4th cross Kanakanagara Channapatna Ramanagara District' },
+                    { name: 'Karthik Shivaram', p1: 'Drone Detection Antenna', p2: 'Drone Jammer Design', dept: 'ECE', sem: '5', email: 'karthikshivaram120704@gmail.com', phone: '9353066651', address: 'Door No-9514 NANDANA Phase-2 Stage-4 Vijayanagara Mysore' },
+                    { name: 'Pradeep M', p1: 'Drone Detection Antenna', p2: 'Drone Jammer Design', dept: 'ECE', sem: '5', email: 'pradeepmpradee25@gmail.com', phone: '6363685911', address: 'Horalavadi Hosuru, Mysore dist' },
+                    { name: 'Rohan S R', p1: 'EV Charging Staion Reverse Engineering', p2: 'EV Charging Staion - Reverse Engineering', dept: 'CSE', sem: '5', email: 'rohansrgowda6969@gmail.com', phone: '9108596792', address: 'EAST WEST INSTITUTE OF TECHNOLOGY' },
+                    { name: 'Spandana Venkatesh', p1: 'EV Charging Staion Reverse Engineering', p2: 'Forward Canbus Communication', dept: 'ECE', sem: '5', email: 'spandana884@gmail.com', phone: '8073480115', address: '#12, D block, 1st stage, JP nagar mysuru' },
+                    { name: 'Spoorthi HS', p1: 'Group 3 R&D', p2: 'IOT-Smart LCD System + Drone Jammer', dept: 'ECE', sem: '5', email: 'spoorthisureshh@gmail.com', phone: '8904771953', address: 'Huduco Colony Bhadravathi 577301' },
+                    { name: 'Spoorthi V N', p1: 'Group 3 R&D', p2: 'IOT-Smart LCD System + Drone Jammer', dept: 'ECE', sem: '5', email: 'spoorthivn033@gmail.com', phone: '8197599557', address: 'Vadakanapatte kusugundi Shantapura hosanagar' },
+                    { name: 'Vinendrakumar', p1: 'Group 3 R&D', p2: 'Solar Hybrid System', dept: 'ECE', sem: '5', email: 'vinendravinendranayaka@gmail.com', phone: '7259878925', address: '' },
+                    { name: 'Amith', p1: 'Group 4 R&D', p2: 'Forward Canbus Communication', dept: 'ECE', sem: '5', email: 'amithnaikak@gmail.com', phone: '9353955628', address: '' },
+                    { name: 'Siri G Raghuram', p1: 'Group 4 R&D', p2: 'Canbus Communication -Forward Engineering', dept: 'ECE', sem: '5', email: 'Sirigraghuram15@gmail.com', phone: '9448697548', address: 'Kamandalagondi, Jagalur, Davanagere' },
+                    { name: 'Chandana N', p1: 'Group 4 R&D', p2: 'Forward Canbus Communication', dept: 'ECE', sem: '5', email: 'Chandananc64@gmail.com', phone: '7483666240', address: '2nd main, 1st cross, Jalinagar, Davangere' },
+                    { name: 'Amulya', p1: 'Group 4 R&D', p2: 'Micro Electronic Project', dept: 'ECE', sem: '5', email: 'amulyans2004@gmail.com', phone: '9019125741', address: 'Shri Madhwa Vadiraja Inst. of Tech. & Mgmt., Udupi' },
+                    { name: 'Sanvi', p1: 'Group 4 R&D', p2: 'Development of Antenna', dept: 'ECE', sem: '5', email: 'sanvihr310@gmail.com', phone: '9902029582', address: 'Sri Dharmasthala Manjunatheshwar inst. of Tech., Ujire' },
+                    { name: 'Pooja M B', p1: 'Group 4 R&D', p2: 'Development of Antenna', dept: 'ECE', sem: '5', email: 'poojashettigar05@gmail.com', phone: '9353648305', address: '' },
+                    { name: 'Dhruvitha K G', p1: 'SMPS Supply 12V 30A', p2: 'IOT-Smart LCD Data Encryption', dept: 'CSE', sem: '5', email: 'dhruvithakrishna0808@gmail.com', phone: '8746052195', address: 'Siv nilaya, mutthurayaswamy badavane, kr pete town' },
+                    { name: 'Ayush Babesh', p1: 'SMPS Supply 12V 30A', p2: 'IOT-Smart LCD System', dept: 'ECE', sem: '5', email: 'ayushbabesh5d1102@gmail.com', phone: '9538202846', address: 'Kumbalgodu bangalore 74' },
+                    { name: 'Chethan P', p1: 'SMPS Supply 12V 30A', p2: 'IOT-Smart LCD System', dept: 'ECE', sem: '5', email: 'chethan302010@gmail.com', phone: '6362061939', address: 'Kumbalgodu mysore road' },
+                    { name: 'Dhanush H', p1: 'SMPS Supply 12V 30A', p2: 'EV Charging Staion - Reverse Engineering', dept: 'ECE', sem: '5', email: 'hdhanush1310@gmail.com', phone: '7019190954', address: 'Kumbalagodu, Mysore Road, Bengaluru 74' },
+                    { name: 'Prajwal M P', p1: 'SMPS Supply 48V 50A', p2: 'Rectifier Charger Circuit', dept: 'ECE', sem: '5', email: 'puneeths568@gmail.com', phone: '9964285895', address: 'Mallithammanahalli village Arkalgud taluk Hassan District' },
+                    { name: 'Abhijeet Aste', p1: 'SMPS Supply 48V 50A', p2: 'Rectifier Charger', dept: 'ECE', sem: '5', email: 'abhijeetaste@gmail.com', phone: '8431036204', address: 'AT POST UJALAMB TO BASAVAKALYAN DT.BIDAR' },
+                    { name: 'Dileep Kuber Naik', p1: 'SMPS Supply 48V 50A', p2: 'Rectifier Charger', dept: 'ECE', sem: '5', email: 'dillike48300@gmail.com', phone: '8310784023', address: 'Kayagudde, Gonur, Korlakatta, Sirsi. Uttara Kannada 581318' },
+                    { name: 'Bharath G N', p1: 'SMPS Supply 48V 50A', p2: 'Industry Entry Level Project', dept: 'ECE', sem: '5', email: 'bharathgn16@gmail.com', phone: '8971419003', address: '#515/13 Shivakumar swamy badavane 2nd main 3rd B cross, Davanagere' },
+                    { name: 'Kavyashree K', p1: 'SMPS Supply 24V 30A', p2: 'Reverse Engineering in some new product', dept: 'ECE', sem: '5', email: 'kavyashreekeshavamurthy9@gmail.com', phone: '7483565646', address: 'hosaroad, bengaluru 560100' },
+                    { name: 'Akash HP', p1: 'SMPS Supply 24V 30A', p2: 'Drone Jammer Design', dept: 'ECE', sem: '5', email: 'akash05hp@gmail.com', phone: '8088709113', address: 'C/O Prakash H G No. 16 S No 43 Chikkagollarahatti' },
+                    { name: 'Dhanush E', p1: 'SMPS Supply 24V 30A', p2: 'EV Charging Staion - Reverse Engineering', dept: 'ECE', sem: '5', email: 'acharyadhanush404@gmail.com', phone: '8147758895', address: 'Magadi main road Sunkadakatte Bengaluru 560091' },
+                    { name: 'Asif S Nadaf', p1: 'SMPS Supply 24V 30A', p2: 'Micro Electronic Project', dept: 'ECE', sem: '5', email: 'asifnadaf1282004@gmail.com', phone: '7353515386', address: '#12/1 nanjundadevara layout kodigehalli colony' },
+                    { name: 'M Naveenkumar', p1: 'SMPS Supply 24V 30A', p2: 'CCNA Building Managemnent System', dept: 'EEE', sem: '5', email: 'Naveesnav7259@gmail.com', phone: '9353511413', address: 'Plot no 41 syno 107/1 Siddeshwar colony Gulbarga' },
+                    { name: 'Yashoda', p1: 'Industry Entry Level R&D', p2: 'Reverse Engineering in some new product', dept: 'ECE', sem: '5', email: 'yashodamareppa9686@gmail.com', phone: '9686449961', address: '' },
+                    { name: 'Veekshitha k', p1: 'Industry Entry Level R&D', p2: 'Drone Jammer Design', dept: 'ECE', sem: '5', email: 'veekshithakumar300@gmail.com', phone: '7483298410', address: 'Lakshmi nilaya 33rd cross 35th main Channapatna' },
+                    { name: 'Veeresh', p1: 'Industry Entry Level R&D', p2: 'Drone Jammer Design', dept: 'ECE', sem: '5', email: 'vk7573066@gmail.com', phone: '8660688221', address: 'Near sujala aqua pwd camp sindhanur' },
+                    { name: 'Fairoz', p1: 'Industry Entry Level R&D', p2: 'Drone Jammer Design', dept: 'ECE', sem: '5', email: 'faizzroz2004@gmail.com', phone: '9353592544', address: 'Lingadhalli pavagada to TUMAKURU' },
+                    { name: 'Sumith S Kamble', p1: 'Industry Entry Level R&D', p2: 'Rectifier Charger', dept: 'ECE', sem: '5', email: 'sumithskamble@gmail.com', phone: '7795461502', address: '#30, near nagabrahma temple nagadevanahalli banglore 560056' }
                 ];
 
                 this.showToast('Pushing 33 students to live database. Please wait...', 'warning');
@@ -1291,15 +1320,23 @@
                 document.getElementById('stat-total-logs').innerText = this.data.progressLogs.length;
 
                 const tbody = document.getElementById('student-list-body');
-                tbody.innerHTML = this.data.students.map(s => `
-                    <tr>
-                        <td class="font-bold text-primary">${s.srn}</td>
-                        <td>${s.name}</td>
-                        <td>${s.dept}</td>
-                        <td>${s.sem}</td>
-                        <td><button onclick="App.openEditModal('${s.srn}')" class="btn btn-sm btn-outline">Edit</button></td>
-                    </tr>
-                `).join('') || '<tr><td colspan="5" class="text-center">No students found</td></tr>';
+                tbody.innerHTML = this.data.students.map(s => {
+                    const contactHtml = `
+                        ${s.email ? `<div class="text-xs text-gray-500 mb-1"><i class="fas fa-envelope"></i> ${s.email}</div>` : ''}
+                        ${s.phone ? `<div class="text-xs text-gray-500 mb-1"><i class="fas fa-phone"></i> ${s.phone}</div>` : ''}
+                        ${s.address ? `<div class="text-xs text-gray-400" style="max-width: 200px; white-space: normal; overflow-wrap: break-word;"><i class="fas fa-map-marker-alt"></i> ${s.address}</div>` : ''}
+                    `;
+                    return `
+                        <tr>
+                            <td class="font-bold text-primary">${s.srn}</td>
+                            <td>${s.name}</td>
+                            <td>${s.dept}</td>
+                            <td>${s.sem}</td>
+                            <td>${contactHtml || '<span class="text-xs text-gray-400">No contact info</span>'}</td>
+                            <td><button onclick="App.openEditModal('${s.srn}')" class="btn btn-sm btn-outline">Edit</button></td>
+                        </tr>
+                    `;
+                }).join('') || '<tr><td colspan="6" class="text-center">No students found</td></tr>';
 
                 this.renderAdminTeams();
                 this.renderAdminProjects();
@@ -1711,6 +1748,9 @@
                 const name = document.getElementById('new-name').value;
                 const dept = document.getElementById('new-dept').value;
                 const sem = document.getElementById('new-sem').value;
+                const phone = document.getElementById('new-phone').value;
+                const email = document.getElementById('new-email').value;
+                const address = document.getElementById('new-address').value;
                 const p1 = document.getElementById('new-p1').value;
                 const p2 = document.getElementById('new-p2').value;
                 const pass = document.getElementById('new-pass').value;
@@ -1721,7 +1761,7 @@
                     num++; srn = `SRN${String(num).padStart(3, '0')}`;
                 }
 
-                this.setDbDoc('smps_students', srn, { srn, name, dept, sem, p1, p2, password: pass });
+                this.setDbDoc('smps_students', srn, { srn, name, dept, sem, phone, email, address, p1, p2, password: pass });
                 this.toggleModal('modal-create-student');
                 e.target.reset();
                 this.showToast(`Student Created! SRN: ${srn}`, 'success');
@@ -1734,6 +1774,9 @@
                 document.getElementById('edit-name').value = student.name;
                 document.getElementById('edit-dept').value = student.dept;
                 document.getElementById('edit-sem').value = student.sem;
+                document.getElementById('edit-phone').value = student.phone || '';
+                document.getElementById('edit-email').value = student.email || '';
+                document.getElementById('edit-address').value = student.address || '';
                 document.getElementById('edit-p1').value = student.p1 || '';
                 document.getElementById('edit-p2').value = student.p2 || '';
                 document.getElementById('edit-pass').value = student.password;
@@ -1750,6 +1793,9 @@
                         name: document.getElementById('edit-name').value, 
                         dept: document.getElementById('edit-dept').value, 
                         sem: document.getElementById('edit-sem').value, 
+                        phone: document.getElementById('edit-phone').value,
+                        email: document.getElementById('edit-email').value,
+                        address: document.getElementById('edit-address').value,
                         p1: document.getElementById('edit-p1').value, 
                         p2: document.getElementById('edit-p2').value, 
                         password: document.getElementById('edit-pass').value 
